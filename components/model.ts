@@ -4,3 +4,8 @@ export interface ChunkData {
   text: string;
   prediction: { [key: string]: number };
 }
+
+export interface UploadAudioResponse {
+  chunks: ChunkData[];
+  image_base64: string
+}

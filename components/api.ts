@@ -1,5 +1,7 @@
+import { UploadAudioResponse } from './model';
+
 export class ApiClient {
-  async uploadAudio(blob: Blob): Promise<any> {
+  async uploadAudio(blob: Blob): Promise<UploadAudioResponse> {
     const formData = new FormData();
     formData.append('file', blob, 'audio.wav');
 

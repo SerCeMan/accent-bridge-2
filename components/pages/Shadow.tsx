@@ -35,7 +35,6 @@ export class ShadowPageStore {
 
   canonicalText: string = '';
 
-
   isShadowing = false;
   isPaused = false;
   shadowingAudio: HTMLAudioElement | null = null;
@@ -43,7 +42,6 @@ export class ShadowPageStore {
   shadowingAudioChunks: Blob[] = [];
 
   shadowingAudioBlob: Blob | null = null;
-
 
   constructor(
     private readonly apiClient: ApiClient,
@@ -137,12 +135,16 @@ export class ShadowPageStore {
   }
 
   handlePauseResumeShadowing() {
-    if (this.isPaused) {
-      this.shadowingAudio?.play();
-    } else {
-      this.shadowingAudio?.pause();
+    if (this.shadowingMediaRecorder && this.isShadowing) {
+      if (this.isPaused) {
+        this.shadowingMediaRecorder.resume();
+        this.shadowingAudio?.play();
+      } else {
+        this.shadowingMediaRecorder.pause();
+        this.shadowingAudio?.pause();
+      }
+      this.setIsPaused(!this.isPaused);
     }
-    this.setIsPaused(!this.isPaused);
   }
 
   // Utility setters to ensure state changes are tracked by MobX
@@ -321,21 +323,21 @@ export class ShadowPageStore {
   }
 }
 
-export const Shadow = observer(({ store }: {
-  store: ShadowPageStore
-}) => {
-  const playAudio = (url: string) => {
-    const audio = new Audio(url);
-    audio.play();
-  };
-
+export const Shadow = observer(({ store }: { store: ShadowPageStore }) => {
   useEffect(() => {
-    // Cleanup any audio elements
     return () => {
       const audios = document.querySelectorAll('audio');
       audios.forEach((audio) => audio.pause());
     };
   }, []);
+
+  const handleShadowing = () => {
+    if (store.isShadowing) {
+      store.handlePauseResumeShadowing();
+    } else {
+      store.handleStartShadowing();
+    }
+  };
 
   return (
     <div className="flex flex-col items-center min-h-screen">
@@ -352,7 +354,7 @@ export const Shadow = observer(({ store }: {
             Synthesize
           </IonButton>
           <IonButton
-            onClick={() => store.handleStartShadowing()}
+            onClick={handleShadowing}
             color={store.isShadowing ? 'danger' : 'success'}
             className="mr-2"
           >
@@ -377,7 +379,7 @@ export const Shadow = observer(({ store }: {
               className="w-full h-full border rounded"
               rows={5}
               value={store.canonicalText}
-              onChange={(e) => store.canonicalText = e.target.value}
+              onChange={(e) => (store.canonicalText = e.target.value)}
             />
           </div>
           <div className="flex flex-col items-center justify-center h-full w-1/2">
@@ -386,16 +388,14 @@ export const Shadow = observer(({ store }: {
                 Your browser does not support the audio element.
               </audio>
             )}
-            <div className="flex flex-wrap border rounded h-full w-full">
-              {store.transcriptionData.map((chunk, index) => (
-                <StyledTextChunk
-                  key={index}
-                  chunk={chunk}
-                  expectedAccent={store.selectedAccent}
-                  onPlay={(start, end) => store.handlePlayChunk(start, end)}
-                />
-              ))}
-            </div>
+            {store.transcriptionData.map((chunk, index) => (
+              <StyledTextChunk
+                key={index}
+                chunk={chunk}
+                expectedAccent={store.selectedAccent}
+                onPlay={(start, end) => store.handlePlayChunk(start, end)}
+              />
+            ))}
           </div>
         </div>
         {store.isLoading && <p className="text-blue-600">Loading...</p>}
@@ -423,11 +423,6 @@ export const ShadowSkeleton = ({ children }: { children: React.ReactNode }) => {
         </IonToolbar>
       </IonHeader>
       <IonContent className="ion-padding" fullscreen>
-        {/*<IonHeader collapse="condense">*/}
-        {/*  <IonToolbar>*/}
-        {/*    <IonTitle size="large">Shadow</IonTitle>*/}
-        {/*  </IonToolbar>*/}
-        {/*</IonHeader>*/}
         <Notifications
           open={showNotifications}
           onDidDismiss={() => setShowNotifications(false)}

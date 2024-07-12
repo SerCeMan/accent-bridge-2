@@ -17,7 +17,6 @@ const SettingsPage = () => {
   );
 };
 
-
 const shadowPageStore = new ShadowPageStore(apiClient, settings);
 export const ShadowPage = () => {
   return (

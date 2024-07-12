@@ -66,7 +66,15 @@ export class ShadowPageStore {
     this.setIsShadowing(true);
     this.setIsPaused(false);
 
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    // ensure to disable audio processing features to avoid interference with
+    // the synthesized audio playing in the background
+    const stream = await navigator.mediaDevices.getUserMedia({
+      audio: {
+        echoCancellation: false,
+        noiseSuppression: false,
+        autoGainControl: false,
+      },
+    });
     const shadowingMediaRecorder = new MediaRecorder(stream);
     const audio = new Audio(this.synthesizedAudioSrc);
     audio.currentTime = 0;

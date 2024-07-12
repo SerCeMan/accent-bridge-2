@@ -356,6 +356,7 @@ export const Shadow = observer(({ store }: { store: ShadowPageStore }) => {
           <IonButton
             onClick={handleShadowing}
             color={store.isShadowing ? 'danger' : 'success'}
+            disabled={!store.synthesizedAudioSrc}
             className="mr-2"
           >
             {store.isShadowing && !store.isPaused ? 'Pause' : store.isShadowing ? 'Resume' : 'Start'}
@@ -388,14 +389,16 @@ export const Shadow = observer(({ store }: { store: ShadowPageStore }) => {
                 Your browser does not support the audio element.
               </audio>
             )}
-            {store.transcriptionData.map((chunk, index) => (
-              <StyledTextChunk
-                key={index}
-                chunk={chunk}
-                expectedAccent={store.selectedAccent}
-                onPlay={(start, end) => store.handlePlayChunk(start, end)}
-              />
-            ))}
+            <div className="flex flex-wrap border rounded h-full w-full">
+              {store.transcriptionData.map((chunk, index) => (
+                <StyledTextChunk
+                  key={index}
+                  chunk={chunk}
+                  expectedAccent={store.selectedAccent}
+                  onPlay={(start, end) => store.handlePlayChunk(start, end)}
+                />
+              ))}
+            </div>
           </div>
         </div>
         {store.isLoading && <p className="text-blue-600">Loading...</p>}
@@ -413,7 +416,7 @@ export const ShadowSkeleton = ({ children }: { children: React.ReactNode }) => {
         <IonToolbar>
           <IonTitle>Shadowing</IonTitle>
           <IonButtons slot="start">
-            <IonMenuButton />
+          <IonMenuButton />
           </IonButtons>
           <IonButtons slot="end">
             <IonButton onClick={() => setShowNotifications(true)}>

@@ -1,10 +1,21 @@
-import { IonContent, IonHeader, IonItem, IonList, IonPage, IonTitle, IonToggle, IonToolbar } from '@ionic/react';
+import {
+  IonContent,
+  IonHeader,
+  IonItem,
+  IonList,
+  IonPage,
+  IonSelect, IonSelectOption,
+  IonTitle,
+  IonToggle,
+  IonToolbar,
+} from '@ionic/react';
 import { setSettings } from '../../store/actions';
 import { makeAutoObservable } from 'mobx';
 import { observer } from 'mobx-react-lite';
 
 export class SettingsStore {
   private _enableNotifications: boolean = true;
+  private _selectedAccent: string = 'british';
 
   constructor() {
     makeAutoObservable(this);
@@ -16,6 +27,14 @@ export class SettingsStore {
 
   set enableNotifications(value: boolean) {
     this._enableNotifications = value;
+  }
+
+  get selectedAccent(): string {
+    return this._selectedAccent;
+  }
+
+  set selectedAccent(value: string) {
+    this._selectedAccent = value;
   }
 }
 
@@ -29,20 +48,28 @@ export const Settings = observer(({ store }: { store: SettingsStore }) => {
       </IonHeader>
       <IonContent>
         <IonList>
-          <IonItem>
-            <IonToggle
-              checked={store.enableNotifications}
-              onIonChange={e => {
-                setSettings({
-                  ...store,
-                  enableNotifications: e.target.checked,
-                });
-              }}
-            >
-              Enable Notifications
-            </IonToggle>
-          </IonItem>
+          {/*<IonItem>*/}
+          {/*  <IonToggle*/}
+          {/*    checked={store.enableNotifications}*/}
+          {/*    onIonChange={e => {*/}
+          {/*      setSettings({*/}
+          {/*        ...store,*/}
+          {/*        enableNotifications: e.target.checked,*/}
+          {/*      });*/}
+          {/*    }}*/}
+          {/*  >*/}
+          {/*    Enable Notifications*/}
+          {/*  </IonToggle>*/}
+          {/*</IonItem>*/}
         </IonList>
+        <IonSelect
+          value={store.selectedAccent}
+          onIonChange={(e) => store.selectedAccent = e.detail.value}
+          className="w-full p-2 mb-4 border rounded"
+        >
+          <IonSelectOption value="british">British</IonSelectOption>
+          <IonSelectOption value="us">US</IonSelectOption>
+        </IonSelect>
       </IonContent>
     </IonPage>
   );

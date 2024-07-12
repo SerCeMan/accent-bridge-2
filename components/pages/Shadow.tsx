@@ -6,7 +6,7 @@ import {
   IonHeader,
   IonIcon,
   IonMenuButton,
-  IonPage,
+  IonPage, IonSelect, IonSelectOption,
   IonTitle,
   IonToolbar,
 } from '@ionic/react';
@@ -18,6 +18,7 @@ import { makeAutoObservable, runInAction } from 'mobx';
 import { ChunkData } from '../model';
 import StyledTextChunk from '../ui/StyledTextChunk';
 import { SettingsStore } from './Settings';
+import { ApiClient } from '../api';
 
 export class ShadowPageStore {
   imageSrc: string | null = null;
@@ -27,7 +28,6 @@ export class ShadowPageStore {
   errorMessage: string | null = null;
   transcriptionData: ChunkData[] = [];
   synthesizedAudioSrc: string | null = null;
-  selectedAccent: string = 'british';
   mediaRecorder: MediaRecorder | null = null;
   audioStream: MediaStream | null = null;
   audioChunks: Blob[] = [];
@@ -45,12 +45,19 @@ export class ShadowPageStore {
   shadowingAudioBlob: Blob | null = null;
 
 
-  constructor(settings: SettingsStore) {
+  constructor(
+    private readonly apiClient: ApiClient,
+    private readonly settings: SettingsStore,
+  ) {
     makeAutoObservable(this);
   }
 
-  async sleep(ms: number) {
-    return new Promise((resolve) => setTimeout(resolve, ms));
+  get selectedAccent(): string {
+    return this.settings.selectedAccent;
+  }
+
+  set selectedAccent(value: string) {
+    this.settings.selectedAccent = value;
   }
 
   async handleStartShadowing() {
@@ -95,21 +102,9 @@ export class ShadowPageStore {
         this.shadowingAudioBlob = audioBlob;
       });
 
-      const formData = new FormData();
-      formData.append('file', audioBlob, 'audio.wav');
-
       this.setIsLoading(true);
       try {
-        const response = await fetch('http://192.168.50.197:5000/predict', {
-          method: 'POST',
-          body: formData,
-        });
-
-        if (!response.ok) {
-          throw new Error('Network response was not ok');
-        }
-
-        const data = await response.json();
+        const data = await this.apiClient.uploadAudio(audioBlob);
         runInAction(() => {
           this.setImageSrc(`data:image/png;base64,${data.image_base64}`);
           this.setTranscriptionData(data.chunks);
@@ -127,13 +122,10 @@ export class ShadowPageStore {
       }
     };
 
-    // Start the recording
     shadowingMediaRecorder.start();
-
-    // Start audio playback immediately
     setTimeout(() => {
       audio.play();
-    }, 2000); // Adjust this delay as necessary
+    }, 2000);
   }
 
   handleStopShadowing() {
@@ -256,42 +248,6 @@ export class ShadowPageStore {
     }
   }
 
-  async handleFileUpload(file: File) {
-    if (file) {
-      this.setImageSrc(null);
-      this.setErrorMessage(null);
-      this.setTranscriptionData([]);
-      const audioURL = URL.createObjectURL(file);
-      this.setAudioSrc(audioURL);
-
-      const formData = new FormData();
-      formData.append('file', file);
-
-      this.setIsLoading(true);
-      try {
-        const response = await fetch('http://192.168.50.197:5000/predict', {
-          method: 'POST',
-          body: formData,
-        });
-
-        if (!response.ok) {
-          throw new Error('Network response was not ok');
-        }
-
-        const data = await response.json();
-        runInAction(() => {
-          this.setImageSrc(`data:image/png;base64,${data.image_base64}`);
-          this.setTranscriptionData(data.chunks);
-        });
-      } catch (error) {
-        console.error('Error uploading file:', error);
-        this.setErrorMessage('Error uploading file');
-      } finally {
-        this.setIsLoading(false);
-      }
-    }
-  }
-
   async handleSynthesize() {
     const text = this.canonicalText;
     const accent = this.selectedAccent;
@@ -306,19 +262,7 @@ export class ShadowPageStore {
     this.setSynthesizedAudioSrc(null);
 
     try {
-      const response = await fetch('http://192.168.50.197:5001/synthesize', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ text, accent }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
-      }
-
-      const audioBlob = await response.blob();
+      const audioBlob = await this.apiClient.synthesizeText(text, accent);
       const audioURL = URL.createObjectURL(audioBlob);
       this.setSynthesizedAudioSrc(audioURL);
     } catch (error) {
@@ -348,90 +292,6 @@ export class ShadowPageStore {
     audio.play();
   }
 
-  async handleStartChunkRecording(index: number) {
-    if (this.isRecording) {
-      return;
-    }
-
-    try {
-      this.chunkBeingRecorded = index;
-      this.setIsRecording(true);
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      runInAction(() => {
-        this.audioStream = stream;
-      });
-      const mediaRecorder = new MediaRecorder(stream);
-
-      runInAction(() => {
-        this.audioChunks = [];
-      });
-
-      mediaRecorder.ondataavailable = (event) => {
-        if (event.data.size > 0) {
-          runInAction(() => {
-            this.audioChunks.push(event.data);
-          });
-        }
-      };
-
-      mediaRecorder.onstop = async () => {
-        const audioBlob = new Blob(this.audioChunks, { type: 'audio/wav' });
-        if (audioBlob.size === 0) {
-          console.error('Recorded audio blob is empty.');
-          return;
-        }
-
-        runInAction(() => {
-          this.shadowingAudioBlob = audioBlob;
-        });
-
-        const formData = new FormData();
-        formData.append('file', audioBlob, 'audio.wav');
-
-        this.setIsLoading(true);
-        try {
-          const response = await fetch('http://192.168.50.197:5000/predict', {
-            method: 'POST',
-            body: formData,
-          });
-
-          if (!response.ok) {
-            throw new Error('Network response was not ok');
-          }
-
-          const data = await response.json();
-          runInAction(() => {
-            const prevData = this.transcriptionData;
-            const replacedIndex = index;
-            const newData = [...prevData];
-            newData[replacedIndex] = data.chunks[0];
-            this.setTranscriptionData(newData);
-          });
-        } catch (error) {
-          console.error('Error uploading audio:', error);
-          this.setErrorMessage('Error uploading audio');
-        } finally {
-          this.setIsLoading(false);
-          if (this.audioStream) {
-            this.audioStream.getTracks().forEach((track) => track.stop());
-            this.audioStream = null;
-          }
-          this.chunkBeingRecorded = null;
-          this.setIsRecording(false);
-        }
-      };
-
-      runInAction(() => {
-        this.mediaRecorder = mediaRecorder;
-      });
-      mediaRecorder.start();
-    } catch (error) {
-      console.error('Error starting chunk recording:', error);
-      this.setIsRecording(false);
-    }
-  }
-
-  // Utility setters to ensure state changes are tracked by MobX
   setIsRecording(value: boolean) {
     this.isRecording = value;
   }
@@ -459,10 +319,6 @@ export class ShadowPageStore {
   setSynthesizedAudioSrc(value: string | null) {
     this.synthesizedAudioSrc = value;
   }
-
-  setSelectedAccent(itemValue: string) {
-    this.selectedAccent = itemValue;
-  }
 }
 
 export const Shadow = observer(({ store }: {
@@ -482,16 +338,11 @@ export const Shadow = observer(({ store }: {
   }, []);
 
   return (
-    <div className="flex flex-col items-center min-h-screen p-4">
+    <div className="flex flex-col items-center min-h-screen">
+      {!store.isLoading && store.errorMessage && (
+        <p className="text-red-600">{store.errorMessage}</p>
+      )}
       <div className="w-full max-w-md">
-        <select
-          value={store.selectedAccent}
-          onChange={(e) => store.setSelectedAccent(e.target.value)}
-          className="w-full p-2 mb-4 border rounded"
-        >
-          <option value="british">British</option>
-          <option value="us">US</option>
-        </select>
         <div className="flex justify-center mb-4">
           <IonButton
             onClick={() => store.handleSynthesize()}
@@ -500,45 +351,30 @@ export const Shadow = observer(({ store }: {
           >
             Synthesize
           </IonButton>
-        </div>
-        <div className="flex justify-center mb-4">
-          <IonButton
-            onClick={() => store.handleStartStopRecording()}
-            color="primary"
-            className="mr-2"
-          >
-            {store.isRecording ? 'Stop Recording' : 'Start Recording'}
-          </IonButton>
-        </div>
-        <div className="flex justify-center mb-4">
           <IonButton
             onClick={() => store.handleStartShadowing()}
             color={store.isShadowing ? 'danger' : 'success'}
             className="mr-2"
           >
-            {store.isShadowing && !store.isPaused ? 'Pause Shadowing' : store.isShadowing ? 'Resume Shadowing' : 'Start Shadowing'}
+            {store.isShadowing && !store.isPaused ? 'Pause' : store.isShadowing ? 'Resume' : 'Start'}
           </IonButton>
           <IonButton
             onClick={() => store.handleStopShadowing()}
             color="danger"
             disabled={!store.isShadowing}
           >
-            Stop Shadowing
+            Stop
           </IonButton>
         </div>
         <div style={{ height: '30em' }} className="flex flex-row">
           <div className="flex flex-col items-center justify-center h-full w-1/2">
             {store.synthesizedAudioSrc && (
-              <IonButton
-                onClick={() => playAudio(store.synthesizedAudioSrc!)}
-                color="secondary"
-                className="mb-2"
-              >
-                Play Synthesized Audio
-              </IonButton>
+              <audio controls src={store.synthesizedAudioSrc} className="w-full mt-4">
+                Your browser does not support the audio element.
+              </audio>
             )}
             <textarea
-              className="w-full h-full p-2 border rounded"
+              className="w-full h-full border rounded"
               rows={5}
               value={store.canonicalText}
               onChange={(e) => store.canonicalText = e.target.value}
@@ -546,15 +382,11 @@ export const Shadow = observer(({ store }: {
           </div>
           <div className="flex flex-col items-center justify-center h-full w-1/2">
             {store.audioSrc && (
-              <IonButton
-                onClick={() => playAudio(store.audioSrc!)}
-                color="secondary"
-                className="mb-2"
-              >
-                Play Uploaded Audio
-              </IonButton>
+              <audio controls src={store.audioSrc} className="w-full mt-4">
+                Your browser does not support the audio element.
+              </audio>
             )}
-            <div className="flex flex-wrap border p-4 rounded h-full w-full">
+            <div className="flex flex-wrap border rounded h-full w-full">
               {store.transcriptionData.map((chunk, index) => (
                 <StyledTextChunk
                   key={index}
@@ -567,12 +399,6 @@ export const Shadow = observer(({ store }: {
           </div>
         </div>
         {store.isLoading && <p className="text-blue-600">Loading...</p>}
-        {!store.isLoading && store.imageSrc && (
-          <img src={store.imageSrc} className="w-full h-64 object-contain mb-4" />
-        )}
-        {!store.isLoading && store.errorMessage && (
-          <p className="text-red-600">{store.errorMessage}</p>
-        )}
       </div>
     </div>
   );
@@ -597,11 +423,11 @@ export const ShadowSkeleton = ({ children }: { children: React.ReactNode }) => {
         </IonToolbar>
       </IonHeader>
       <IonContent className="ion-padding" fullscreen>
-        <IonHeader collapse="condense">
-          <IonToolbar>
-            <IonTitle size="large">Shadow</IonTitle>
-          </IonToolbar>
-        </IonHeader>
+        {/*<IonHeader collapse="condense">*/}
+        {/*  <IonToolbar>*/}
+        {/*    <IonTitle size="large">Shadow</IonTitle>*/}
+        {/*  </IonToolbar>*/}
+        {/*</IonHeader>*/}
         <Notifications
           open={showNotifications}
           onDidDismiss={() => setShowNotifications(false)}

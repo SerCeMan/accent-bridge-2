@@ -32,7 +32,7 @@ const AllLists = () => {
   );
 };
 
-const Lists = () => {
+const AnalyzePage = () => {
   return (
     <IonPage>
       <IonHeader translucent={true}>
@@ -54,4 +54,4 @@ const Lists = () => {
   );
 };
 
-export default Lists;
+export default AnalyzePage;

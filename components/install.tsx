@@ -1,5 +1,5 @@
 import { Shadow, ShadowSkeleton, ShadowPageStore } from './pages/Shadow';
-import { IonIcon, IonLabel, IonRouterOutlet, IonTabBar, IonTabButton, IonTabs } from '@ionic/react';
+import { IonApp, IonIcon, IonLabel, IonRouterOutlet, IonTabBar, IonTabButton, IonTabs } from '@ionic/react';
 import { Redirect, Route } from 'react-router-dom';
 import AnalyzePage from './pages/AnalyzePage';
 import ListDetail from './pages/ListDetail';
@@ -7,7 +7,13 @@ import { Settings, SettingsStore } from './pages/Settings';
 import { cog, flash, list } from 'ionicons/icons';
 import React from 'react';
 import { ApiClient } from './api';
+import { AuthService } from './services/auth';
+import { IonReactRouter } from '@ionic/react-router';
+import { Auth } from '@supabase/auth-ui-react';
+import { observer } from 'mobx-react-lite';
+import { AuthScreen } from './pages/AuthScreen';
 
+const authService = new AuthService();
 const apiClient = new ApiClient();
 
 const settings = new SettingsStore();
@@ -18,7 +24,7 @@ const SettingsPage = () => {
 };
 
 const shadowPageStore = new ShadowPageStore(apiClient, settings);
-export const ShadowPage = () => {
+const ShadowPage = () => {
   return (
     <ShadowSkeleton>
       <Shadow store={shadowPageStore} />
@@ -26,7 +32,11 @@ export const ShadowPage = () => {
   );
 };
 
-export const Tabs = () => {
+const AuthPage = () => {
+  return <AuthScreen authService={authService} />;
+};
+
+const Tabs = () => {
   return (
     <IonTabs>
       <IonRouterOutlet>
@@ -57,3 +67,24 @@ export const Tabs = () => {
     </IonTabs>
   );
 };
+
+const Router = () => {
+  return (
+    <IonReactRouter>
+      <IonRouterOutlet id="main">
+        <Route path="/" render={() => <Tabs />} />
+      </IonRouterOutlet>
+    </IonReactRouter>
+  );
+};
+
+export const Root = observer(() => {
+  return (
+    <IonApp>
+      {authService.session
+        ? <Router />
+        : <AuthPage />
+      }
+    </IonApp>
+  );
+});

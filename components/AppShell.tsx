@@ -6,7 +6,7 @@ import { Route } from 'react-router-dom';
 
 
 import React from 'react';
-import { Tabs } from './install';
+import { Root } from './install';
 
 setupIonicReact({});
 
@@ -22,13 +22,7 @@ window
 
 const AppShell = () => {
   return (
-    <IonApp>
-      <IonReactRouter>
-        <IonRouterOutlet id="main">
-          <Route path="/" render={() => <Tabs />} />
-        </IonRouterOutlet>
-      </IonReactRouter>
-    </IonApp>
+    <Root/>
   );
 };
 

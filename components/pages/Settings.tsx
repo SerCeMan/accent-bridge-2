@@ -1,4 +1,5 @@
 import {
+  IonButton, IonButtons,
   IonContent,
   IonHeader,
   IonItem,
@@ -12,6 +13,7 @@ import {
 import { setSettings } from '../../store/actions';
 import { makeAutoObservable } from 'mobx';
 import { observer } from 'mobx-react-lite';
+import { AuthService } from '../services/auth';
 
 export class SettingsStore {
   private _enableNotifications: boolean = true;
@@ -38,7 +40,9 @@ export class SettingsStore {
   }
 }
 
-export const Settings = observer(({ store }: { store: SettingsStore }) => {
+export const Settings = observer((
+  { store, auth }: { store: SettingsStore, auth: AuthService },
+) => {
   return (
     <IonPage>
       <IonHeader>
@@ -47,21 +51,6 @@ export const Settings = observer(({ store }: { store: SettingsStore }) => {
         </IonToolbar>
       </IonHeader>
       <IonContent>
-        <IonList>
-          {/*<IonItem>*/}
-          {/*  <IonToggle*/}
-          {/*    checked={store.enableNotifications}*/}
-          {/*    onIonChange={e => {*/}
-          {/*      setSettings({*/}
-          {/*        ...store,*/}
-          {/*        enableNotifications: e.target.checked,*/}
-          {/*      });*/}
-          {/*    }}*/}
-          {/*  >*/}
-          {/*    Enable Notifications*/}
-          {/*  </IonToggle>*/}
-          {/*</IonItem>*/}
-        </IonList>
         <IonSelect
           value={store.selectedAccent}
           onIonChange={(e) => store.selectedAccent = e.detail.value}
@@ -70,6 +59,10 @@ export const Settings = observer(({ store }: { store: SettingsStore }) => {
           <IonSelectOption value="british">British</IonSelectOption>
           <IonSelectOption value="us">US</IonSelectOption>
         </IonSelect>
+        {/*Logout Button*/}
+        <IonButton onClick={() => auth.logout()} expand="block" className="mb-4">
+          Logout
+        </IonButton>
       </IonContent>
     </IonPage>
   );

@@ -50,18 +50,11 @@ export class ShadowPageStore {
     return this.settings.selectedAccent;
   }
 
-  set selectedAccent(value: string) {
-    this.settings.selectedAccent = value;
-  }
-
   async handleStartShadowing() {
     if (!this.synthesizedAudioSrc) {
       this.setErrorMessage('Please synthesize text before shadowing.');
       return;
     }
-    this.setIsShadowing(true);
-    this.setIsPaused(false);
-
     // ensure to disable audio processing features to avoid interference with
     // the synthesized audio playing in the background
     const stream = await navigator.mediaDevices.getUserMedia({
@@ -71,6 +64,9 @@ export class ShadowPageStore {
         autoGainControl: false,
       },
     });
+    this.setIsShadowing(true);
+    this.setIsPaused(false);
+
     const shadowingMediaRecorder = new MediaRecorder(stream);
     const audio = new Audio(this.synthesizedAudioSrc);
     audio.currentTime = 0;

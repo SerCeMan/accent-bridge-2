@@ -3,7 +3,7 @@ import { AuthService } from '../services/auth';
 import { Auth } from '@supabase/auth-ui-react';
 import { ThemeSupa } from '@supabase/auth-ui-shared';
 import React from 'react';
-import { IonButtons, IonContent, IonHeader, IonMenuButton, IonPage, IonTitle, IonToolbar } from '@ionic/react';
+import { IonContent, IonPage, IonToast } from '@ionic/react';
 
 export const WithAuth = observer(({
                                     authService,
@@ -14,14 +14,14 @@ export const WithAuth = observer(({
   LoggedIn: React.ComponentType<any>
   LoggedOut: React.ComponentType<any>
 }) => {
-  console.log("authService.session", authService.session)
+  console.log('authService.session', authService.session);
   return (
     <>
       {authService.session
         ? <LoggedIn />
         : <LoggedOut />}
     </>
-  )
+  );
 });
 
 export const AuthScreen = observer((
@@ -33,6 +33,24 @@ export const AuthScreen = observer((
         <div className="flex justify-center items-center min-h-screen pb-14">
           <Auth supabaseClient={authService.client} appearance={{ theme: ThemeSupa }} />
         </div>
+        {/*<ion-toast*/}
+        {/*  trigger="open-toast"*/}
+        {/*  message="Hello World!"*/}
+        {/*[duration]="3000"*/}
+        {/*[buttons]="toastButtons"*/}
+        {/*(didDismiss)="setRoleMessage($event)"*/}
+        {/*></ion-toast>*/}
+        <IonToast
+          isOpen={true}
+          message="The application is currently in development. Do not expect it to work reliably at this point in time."
+          duration={10000}
+          buttons={[
+            {
+              text: 'Dismiss',
+              role: 'cancel',
+            },
+          ]}>
+        </IonToast>
       </IonContent>
     </IonPage>
   );

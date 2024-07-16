@@ -34,3 +34,4 @@ tsconfig.tsbuildinfo
 # vercel
 .idea
 .gradle
+.vercel

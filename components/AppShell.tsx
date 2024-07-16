@@ -1,8 +1,6 @@
 'use client';
-import { IonApp, IonRouterOutlet, setupIonicReact } from '@ionic/react';
+import { setupIonicReact } from '@ionic/react';
 import { StatusBar, Style } from '@capacitor/status-bar';
-import { IonReactRouter } from '@ionic/react-router';
-import { Route } from 'react-router-dom';
 
 
 import React from 'react';
@@ -15,7 +13,9 @@ window
   .addEventListener('change', async status => {
     try {
       await StatusBar.setStyle({
-        style: status.matches ? Style.Dark : Style.Light,
+        // style: status.matches ? Style.Dark : Style.Light,
+        // TODO: for now, always light
+        style: Style.Light
       });
     } catch {}
   });

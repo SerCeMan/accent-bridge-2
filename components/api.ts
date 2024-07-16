@@ -1,5 +1,6 @@
 import { UploadAudioResponse } from './model';
 import { AuthService } from './services/auth';
+import { fakeShadowText, fakeUploadAudioResponse, isFakeMode } from './fakedata';
 
 export class ApiClient {
   constructor(private readonly authService: AuthService) {}
@@ -13,6 +14,9 @@ export class ApiClient {
   }
 
   async uploadAudio(blob: Blob): Promise<UploadAudioResponse> {
+    if (isFakeMode()) {
+      return fakeUploadAudioResponse;
+    }
     const formData = new FormData();
     formData.append('file', blob, 'audio.wav');
 

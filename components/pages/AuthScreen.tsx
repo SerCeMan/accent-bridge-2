@@ -33,15 +33,8 @@ export const AuthScreen = observer((
         <div className="flex justify-center items-center min-h-screen pb-14">
           <Auth supabaseClient={authService.client} appearance={{ theme: ThemeSupa }} />
         </div>
-        {/*<ion-toast*/}
-        {/*  trigger="open-toast"*/}
-        {/*  message="Hello World!"*/}
-        {/*[duration]="3000"*/}
-        {/*[buttons]="toastButtons"*/}
-        {/*(didDismiss)="setRoleMessage($event)"*/}
-        {/*></ion-toast>*/}
         <IonToast
-          isOpen={true}
+          isOpen={authService.isInitialized && !authService.session}
           message="The application is currently in development. Do not expect it to work reliably at this point in time."
           duration={10000}
           buttons={[

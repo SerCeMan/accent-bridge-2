@@ -16,6 +16,7 @@ import { ChunkData } from '../model';
 import StyledTextChunk from '../ui/StyledTextChunk';
 import { SettingsStore } from './Settings';
 import { ApiClient } from '../api';
+import { isFakeMode, fakeShadowText } from '../fakedata';
 
 export class ShadowPageStore {
   imageSrc: string | null = null;
@@ -29,14 +30,13 @@ export class ShadowPageStore {
   audioStream: MediaStream | null = null;
   audioChunks: Blob[] = [];
 
-  canonicalText: string = '';
+  canonicalText: string = isFakeMode() ? fakeShadowText : '';
 
   isShadowing = false;
   isPaused = false;
   shadowingAudio: HTMLAudioElement | null = null;
   shadowingMediaRecorder: MediaRecorder | null = null;
   shadowingAudioChunks: Blob[] = [];
-
   shadowingAudioBlob: Blob | null = null;
 
   constructor(
@@ -277,20 +277,30 @@ export class ShadowPageStore {
   handlePlayChunk(start: number, end: number) {
     if (!this.shadowingAudioBlob) {
       console.error('Invalid audio blob');
-      return;
+      return null;
     }
 
     const audioURL = URL.createObjectURL(this.shadowingAudioBlob);
     const audio = new Audio(audioURL);
     audio.currentTime = start;
+
     const handleTimeUpdate = () => {
       if (audio.currentTime >= end) {
         audio.pause();
         audio.removeEventListener('timeupdate', handleTimeUpdate);
       }
     };
+
     audio.addEventListener('timeupdate', handleTimeUpdate);
     audio.play();
+
+    return {
+      stop: () => {
+        audio.pause();
+        audio.currentTime = 0;
+        audio.removeEventListener('timeupdate', handleTimeUpdate);
+      },
+    };
   }
 
   setIsRecording(value: boolean) {
@@ -377,19 +387,20 @@ export const Shadow = observer(({ store }: { store: ShadowPageStore }) => {
             )}
             <textarea
               className="w-full h-full border rounded"
-              placeholder='Enter text you want to shadow...'
+              placeholder="Enter text you want to shadow..."
               rows={5}
               value={store.canonicalText}
               onChange={(e) => (store.canonicalText = e.target.value)}
             />
           </div>
-          <div className="flex flex-col items-center justify-center h-full w-1/2">
+          <div className="flex flex-col items-center justify-center h-full w-1/2 overflow-y-auto"
+               style={{ maxHeight: '30em' }}>
             {store.audioSrc && (
               <audio controls src={store.audioSrc} className="w-full mt-4">
                 Your browser does not support the audio element.
               </audio>
             )}
-            <div className="flex flex-wrap border rounded h-full w-full">
+            <div className="flex flex-col border rounded h-full w-full overflow-y-auto">
               {store.transcriptionData.map((chunk, index) => (
                 <StyledTextChunk
                   key={index}
@@ -414,7 +425,7 @@ export const ShadowSkeleton = ({ children }: { children: React.ReactNode }) => {
         <IonToolbar>
           <IonTitle>Shadowing</IonTitle>
           <IonButtons slot="start">
-          <IonMenuButton />
+            <IonMenuButton />
           </IonButtons>
         </IonToolbar>
       </IonHeader>

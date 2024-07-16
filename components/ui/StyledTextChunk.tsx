@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { ChunkData } from '../model';
 
 const getChunkStyle = (prediction: { [key: string]: number }, expectedAccent: string) => {
@@ -16,14 +16,39 @@ const getChunkStyle = (prediction: { [key: string]: number }, expectedAccent: st
 const StyledTextChunk: React.FC<{
   chunk: ChunkData;
   expectedAccent: string;
-  onPlay: (start: number, end: number) => void;
+  onPlay: (start: number, end: number) => { stop: () => void } | null;
 }> = ({ chunk, expectedAccent, onPlay }) => {
   const [showPopover, setShowPopover] = useState(false);
+  const [audioControl, setAudioControl] = useState<{ stop: () => void } | null>(null);
+  const popoverRef = useRef<HTMLDivElement>(null);
   const chunkStyle = getChunkStyle(chunk.prediction, expectedAccent);
 
   const handlePlay = () => {
-    onPlay(chunk.start, chunk.end);
+    const control = onPlay(chunk.start, chunk.end);
+    setAudioControl(control);
   };
+
+  const handleClickOutside = (event: MouseEvent) => {
+    if (popoverRef.current && !popoverRef.current.contains(event.target as Node)) {
+      setShowPopover(false);
+      if (audioControl) {
+        audioControl.stop();
+        setAudioControl(null);
+      }
+    }
+  };
+
+  useEffect(() => {
+    if (showPopover) {
+      document.addEventListener('mousedown', handleClickOutside);
+    } else {
+      document.removeEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showPopover, audioControl]);
 
   return (
     <>
@@ -46,7 +71,7 @@ const StyledTextChunk: React.FC<{
         }
         .popover-content {
           z-index: 10;
-          top: 100%;
+          bottom: 100%;
           left: 50%;
           transform: translateX(-50%);
           width: 200px;
@@ -60,15 +85,12 @@ const StyledTextChunk: React.FC<{
           {chunk.text}
         </span>
         {showPopover && (
-          <div className="popover-content absolute bg-white border border-gray-300 p-2 rounded shadow-lg">
+          <div ref={popoverRef} className="popover-content absolute bg-white border border-gray-300 p-2 rounded shadow-lg">
             {Object.entries(chunk.prediction).map(([accent, prob]) => (
               <div key={accent}>{`${accent}: ${(prob * 100).toFixed(2)}%`}</div>
             ))}
             <button onClick={handlePlay} className="mt-2 p-1 bg-blue-500 text-white rounded">
               Play
-            </button>
-            <button onClick={() => setShowPopover(false)} className="ml-2 mt-2 p-1 bg-gray-500 text-white rounded">
-              Close
             </button>
           </div>
         )}

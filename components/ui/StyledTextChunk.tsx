@@ -20,34 +20,43 @@ const StyledTextChunk: React.FC<{
   onPlay: (start: number, end: number) => { stop: () => void } | null;
 }> = ({ chunk, expectedAccent, onPlay }) => {
   const [showPopover, setShowPopover] = useState(false);
+  const [audioControl, setAudioControl] = useState<{ stop: () => void } | null>(null);
   const chunkId = `chunk-${chunk.start}-${chunk.end}`;
 
   const chunkStyle = getChunkStyle(chunk.prediction, expectedAccent);
 
   const handlePlay = () => {
     const control = onPlay(chunk.start, chunk.end);
-    control && control.stop();
+    setAudioControl(control);
+  };
+
+  const handlePopoverDismiss = () => {
+    setShowPopover(false);
+    if (audioControl) {
+      audioControl.stop();
+      setAudioControl(null);
+    }
   };
 
   return (
     <>
       <style jsx>{`
-        .chunk {
-          cursor: pointer;
-          padding: 2px 4px;
-          border-radius: 4px;
-          margin-right: 2px;
-          display: inline-block;
-        }
-        .high-match {
-          background-color: #32CD32; /* Green for high match */
-        }
-        .medium-match {
-          background-color: #FFD700; /* Yellow for medium match */
-        }
-        .low-match {
-          background-color: #DC143C; /* Red for low match */
-        }
+          .chunk {
+              cursor: pointer;
+              padding: 2px 4px;
+              border-radius: 4px;
+              margin-right: 2px;
+              display: inline-block;
+          }
+          .high-match {
+              background-color: #32CD32; /* Green for high match */
+          }
+          .medium-match {
+              background-color: #FFD700; /* Yellow for medium match */
+          }
+          .low-match {
+              background-color: #DC143C; /* Red for low match */
+          }
       `}</style>
       <div className="relative inline-block">
         <span
@@ -59,7 +68,7 @@ const StyledTextChunk: React.FC<{
         </span>
         <IonPopover
           isOpen={showPopover}
-          onDidDismiss={() => setShowPopover(false)}
+          onDidDismiss={handlePopoverDismiss}
           trigger={chunkId}
         >
           <div className="popover-content p-2">

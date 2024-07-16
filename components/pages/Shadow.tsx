@@ -296,6 +296,7 @@ export class ShadowPageStore {
 
     return {
       stop: () => {
+        console.log("STOP")
         audio.pause();
         audio.currentTime = 0;
         audio.removeEventListener('timeupdate', handleTimeUpdate);

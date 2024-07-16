@@ -1,17 +1,14 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import {
   IonButton,
   IonButtons,
   IonContent,
   IonHeader,
-  IonIcon,
   IonMenuButton,
-  IonPage, IonSelect, IonSelectOption,
+  IonPage,
   IonTitle,
   IonToolbar,
 } from '@ionic/react';
-import { notificationsOutline } from 'ionicons/icons';
-import Notifications from './Notifications';
 import { observer } from 'mobx-react-lite';
 
 import { makeAutoObservable, runInAction } from 'mobx';
@@ -31,7 +28,6 @@ export class ShadowPageStore {
   mediaRecorder: MediaRecorder | null = null;
   audioStream: MediaStream | null = null;
   audioChunks: Blob[] = [];
-  chunkBeingRecorded: number | null = null;
 
   canonicalText: string = '';
 
@@ -178,13 +174,12 @@ export class ShadowPageStore {
 
   async handleStartRecording() {
     try {
-      this.setIsRecording(true);
-      this.setImageSrc(null);
-      this.setErrorMessage(null);
-      // this.setTranscriptionData([]);
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       runInAction(() => {
         this.audioStream = stream;
+        this.setIsRecording(true);
+        this.setImageSrc(null);
+        this.setErrorMessage(null);
       });
       const mediaRecorder = new MediaRecorder(stream);
 
@@ -386,6 +381,7 @@ export const Shadow = observer(({ store }: { store: ShadowPageStore }) => {
             )}
             <textarea
               className="w-full h-full border rounded"
+              placeholder='Enter text you want to shadow...'
               rows={5}
               value={store.canonicalText}
               onChange={(e) => (store.canonicalText = e.target.value)}
@@ -416,8 +412,6 @@ export const Shadow = observer(({ store }: { store: ShadowPageStore }) => {
 });
 
 export const ShadowSkeleton = ({ children }: { children: React.ReactNode }) => {
-  const [showNotifications, setShowNotifications] = useState(false);
-
   return (
     <IonPage>
       <IonHeader>
@@ -426,18 +420,9 @@ export const ShadowSkeleton = ({ children }: { children: React.ReactNode }) => {
           <IonButtons slot="start">
           <IonMenuButton />
           </IonButtons>
-          <IonButtons slot="end">
-            <IonButton onClick={() => setShowNotifications(true)}>
-              <IonIcon icon={notificationsOutline} />
-            </IonButton>
-          </IonButtons>
         </IonToolbar>
       </IonHeader>
       <IonContent className="ion-padding" fullscreen>
-        <Notifications
-          open={showNotifications}
-          onDidDismiss={() => setShowNotifications(false)}
-        />
         {children}
       </IonContent>
     </IonPage>

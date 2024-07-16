@@ -54,10 +54,6 @@ const Tabs = () => {
           <IonIcon icon={flash} />
           <IonLabel>Shadow</IonLabel>
         </IonTabButton>
-        {/*<IonTabButton tab="tab2" href="/lists">*/}
-        {/*  <IonIcon icon={list} />*/}
-        {/*  <IonLabel>Lists</IonLabel>*/}
-        {/*</IonTabButton>*/}
         <IonTabButton tab="tab3" href="/settings">
           <IonIcon icon={cog} />
           <IonLabel>Settings</IonLabel>

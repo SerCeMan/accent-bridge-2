@@ -16,7 +16,7 @@ export class ApiClient {
     const formData = new FormData();
     formData.append('file', blob, 'audio.wav');
 
-    const response = await fetch('http://192.168.50.197:5000/predict', {
+    const response = await fetch('https://api.accentbridge.app/predict', {
       method: 'POST',
       body: formData,
       headers: {
@@ -32,7 +32,7 @@ export class ApiClient {
   }
 
   async synthesizeText(text: string, accent: string): Promise<Blob> {
-    const response = await fetch('http://192.168.50.197:5001/synthesize', {
+    const response = await fetch('https://api.accentbridge.app/synthesize', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

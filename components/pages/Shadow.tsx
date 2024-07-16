@@ -253,8 +253,8 @@ export class ShadowPageStore {
     const text = this.canonicalText;
     const accent = this.selectedAccent;
 
-    if (!text || !accent) {
-      this.setErrorMessage('Text or accent is missing.');
+    if (!text) {
+      this.setErrorMessage('Please enter text first');
       return;
     }
 

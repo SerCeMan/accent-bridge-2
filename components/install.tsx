@@ -3,7 +3,7 @@ import { IonApp, IonIcon, IonLabel, IonRouterOutlet, IonTabBar, IonTabButton, Io
 import { Redirect, Route } from 'react-router-dom';
 import AnalyzePage from './pages/AnalyzePage';
 import ListDetail from './pages/ListDetail';
-import { Settings, SettingsStore } from './pages/Settings';
+import { Settings } from './pages/Settings';
 import { cog, flash } from 'ionicons/icons';
 import React from 'react';
 import { ApiClient } from './api';
@@ -13,11 +13,14 @@ import { observer } from 'mobx-react-lite';
 import { AuthScreen, WithAuth } from './pages/AuthScreen';
 
 import { ShadowStore } from './pages/stores/ShadowStore';
+import { SupabaseService } from './services/supabase';
+import { SettingsStore } from './pages/stores/SettingsStore';
 
-const authService = new AuthService();
+const supabase = new SupabaseService();
+const authService = new AuthService(supabase);
 const apiClient = new ApiClient(authService);
 
-const settings = new SettingsStore();
+const settings = new SettingsStore(supabase);
 const SettingsPage = () => {
   return (
     <Settings store={settings} auth={authService} />

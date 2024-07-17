@@ -5,7 +5,7 @@ import {
   IonContent,
   IonHeader,
   IonMenuButton,
-  IonPage,
+  IonPage, IonSpinner,
   IonTitle,
   IonToolbar,
 } from '@ionic/react';
@@ -53,7 +53,7 @@ export const Shadow = observer(({ store }: { store: ShadowStore }) => {
             color="success"
             className="mr-2"
           >
-            Synthesize
+            {store.isSelectedAccentLoaded ? 'Synthesize' : <IonSpinner />}
           </IonButton>
           <IonButton
             onClick={handleShadowing}

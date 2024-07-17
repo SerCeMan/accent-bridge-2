@@ -1,8 +1,8 @@
 import { ChunkData } from '../../model';
 import { fakeShadowText, isFakeMode } from '../../fakedata';
 import { ApiClient } from '../../api';
-import { SettingsStore } from '../Settings';
 import { computed, makeAutoObservable, runInAction } from 'mobx';
+import { SettingsStore } from './SettingsStore';
 
 export class ShadowStore {
   audioSrc: string | null = null;
@@ -33,8 +33,16 @@ export class ShadowStore {
     });
   }
 
+  get isSelectedAccentLoaded(): boolean {
+    return this.settings.selectedAccent !== undefined;
+  }
+
   get selectedAccent(): string {
-    return this.settings.selectedAccent;
+    const selectedAccent = this.settings.selectedAccent;
+    if (!selectedAccent) {
+      throw new Error('Selected accent is not loaded yet');
+    }
+    return selectedAccent;
   }
 
   // Add a computed property for score

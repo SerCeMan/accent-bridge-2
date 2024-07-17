@@ -13,9 +13,7 @@ window
   .addEventListener('change', async status => {
     try {
       await StatusBar.setStyle({
-        // style: status.matches ? Style.Dark : Style.Light,
-        // TODO: for now, always light
-        style: Style.Light
+        style: status.matches ? Style.Dark : Style.Light,
       });
     } catch {}
   });

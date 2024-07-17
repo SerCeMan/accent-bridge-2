@@ -31,7 +31,7 @@ const NotificationItem = ({
   </IonItem>
 );
 
-const Notifications = ({
+export const Notifications = ({
   open,
   onDidDismiss,
 }: {
@@ -70,5 +70,3 @@ const Notifications = ({
     </IonModal>
   );
 };
-
-export default Notifications;

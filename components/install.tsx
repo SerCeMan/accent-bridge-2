@@ -1,4 +1,4 @@
-import { Shadow, ShadowPageStore, ShadowSkeleton } from './pages/Shadow';
+import { Shadow, ShadowSkeleton } from './pages/Shadow';
 import { IonApp, IonIcon, IonLabel, IonRouterOutlet, IonTabBar, IonTabButton, IonTabs } from '@ionic/react';
 import { Redirect, Route } from 'react-router-dom';
 import AnalyzePage from './pages/AnalyzePage';
@@ -12,6 +12,8 @@ import { IonReactRouter } from '@ionic/react-router';
 import { observer } from 'mobx-react-lite';
 import { AuthScreen, WithAuth } from './pages/AuthScreen';
 
+import { ShadowStore } from './pages/stores/ShadowStore';
+
 const authService = new AuthService();
 const apiClient = new ApiClient(authService);
 
@@ -22,7 +24,7 @@ const SettingsPage = () => {
   );
 };
 
-const shadowPageStore = new ShadowPageStore(apiClient, settings);
+const shadowPageStore = new ShadowStore(apiClient, settings);
 const ShadowPage = () => {
   return (
     <ShadowSkeleton>

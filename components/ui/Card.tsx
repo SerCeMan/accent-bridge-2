@@ -1,6 +1,6 @@
 import classNames from 'classnames';
 
-const Card = ({
+export const Card = ({
   children,
   className,
 }: {
@@ -13,5 +13,3 @@ const Card = ({
     </div>
   </div>
 );
-
-export default Card;

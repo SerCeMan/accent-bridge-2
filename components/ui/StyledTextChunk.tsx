@@ -14,7 +14,7 @@ const getChunkStyle = (prediction: { [key: string]: number }, expectedAccent: st
   return 'medium-match';
 };
 
-const StyledTextChunk: React.FC<{
+export const StyledTextChunk: React.FC<{
   chunk: ChunkData;
   expectedAccent: string;
   onPlay: (start: number, end: number) => { stop: () => void } | null;
@@ -84,5 +84,3 @@ const StyledTextChunk: React.FC<{
     </>
   );
 };
-
-export default StyledTextChunk;

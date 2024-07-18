@@ -7,19 +7,23 @@ import { IonContent, IonPage, IonToast } from '@ionic/react';
 
 export const WithAuth = observer(({
                                     authService,
+                                    LoadingScreen,
                                     LoggedIn,
                                     LoggedOut,
                                   }: {
   authService: AuthService,
+  LoadingScreen: React.ComponentType<any>
   LoggedIn: React.ComponentType<any>
   LoggedOut: React.ComponentType<any>
 }) => {
   console.log('authService.session', authService.session);
   return (
     <>
-      {authService.session
-        ? <LoggedIn />
-        : <LoggedOut />}
+      {!authService.isInitialized
+        ? <LoadingScreen />
+        : authService.session
+          ? <LoggedIn />
+          : <LoggedOut />}
     </>
   );
 });

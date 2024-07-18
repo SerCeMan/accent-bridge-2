@@ -1,5 +1,5 @@
 import dynamic from 'next/dynamic';
-import { lists } from '../../mock';
+import { lessons } from '../../mock';
 
 const App = dynamic(() => import('../../components/AppShell'), {
   ssr: false,
@@ -8,8 +8,8 @@ const App = dynamic(() => import('../../components/AppShell'), {
 export async function generateStaticParams() {
   return [
     { all: ['shadow'] },
-    { all: ['lists'] },
-    ...lists.map(list => ({ all: ['lists', list.id] })),
+    { all: ['lessons'] },
+    ...lessons.map(list => ({ all: ['lessons', list.id] })),
     { all: ['settings'] },
   ];
 }

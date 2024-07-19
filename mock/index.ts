@@ -6,7 +6,7 @@ export type Exercise = {
 export type Lesson = {
   name: string;
   id: string;
-  exercises?: Exercise[];
+  exercises: Exercise[];
 };
 
 export const lessons: Lesson[] = [

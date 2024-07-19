@@ -1,7 +1,7 @@
 import { ChunkData } from '../../model';
 import { fakeShadowText, isFakeMode } from '../../fakedata';
 import { ApiClient } from '../../api';
-import { computed, makeAutoObservable, runInAction } from 'mobx';
+import { computed, makeAutoObservable, reaction, runInAction } from 'mobx';
 import { SettingsStore } from './SettingsStore';
 
 export class ShadowStore {
@@ -15,7 +15,7 @@ export class ShadowStore {
   audioStream: MediaStream | null = null;
   audioChunks: Blob[] = [];
 
-  canonicalText: string = isFakeMode() ? fakeShadowText : '';
+  private _canonicalText: string = isFakeMode() ? fakeShadowText : '';
 
   isShadowing = false;
   isPaused = false;
@@ -23,6 +23,8 @@ export class ShadowStore {
   shadowingMediaRecorder: MediaRecorder | null = null;
   shadowingAudioChunks: Blob[] = [];
   shadowingAudioBlob: Blob | null = null;
+  isCanonicalTextReadOnly: boolean = false;
+  showSynthesizeButton: boolean = true;
 
   constructor(
     private readonly apiClient: ApiClient,
@@ -30,6 +32,16 @@ export class ShadowStore {
   ) {
     makeAutoObservable(this, {
       shadowingScore: computed,
+    });
+  }
+
+  async ready() {
+    return new Promise<void>((resolve) => {
+      reaction(() => this.isSelectedAccentLoaded, (isSelectedAccentLoaded) => {
+        if (isSelectedAccentLoaded) {
+          resolve();
+        }
+      });
     });
   }
 
@@ -170,6 +182,24 @@ export class ShadowStore {
 
   setIsPaused(value: boolean) {
     this.isPaused = value;
+  }
+
+  get canonicalText(): string {
+    return this._canonicalText;
+  }
+
+  set canonicalText(value: string) {
+    this._canonicalText = value;
+  }
+
+  async setCanonicalTextState(text: string) {
+    runInAction(() => {
+      this.canonicalText = text;
+      this.isCanonicalTextReadOnly = true;
+      this.showSynthesizeButton = false;
+    });
+    await this.ready();
+    this.handleSynthesize();
   }
 
   get rawText(): string {

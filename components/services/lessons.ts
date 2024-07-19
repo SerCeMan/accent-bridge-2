@@ -1,5 +1,5 @@
 import { makeAutoObservable } from 'mobx';
-import { Lesson, lessons } from '../../mock';
+import { Exercise, Lesson, lessons } from '../../mock';
 
 export class LessonsService {
   private _lessons: Lesson[];
@@ -11,5 +11,15 @@ export class LessonsService {
 
   get lessons() {
     return this._lessons;
+  }
+
+  findLessonById(lessonId: string): Lesson | undefined {
+    return this._lessons.find(l => l.id === lessonId);
+  }
+
+  findExerciseById(exerciseId: string): Exercise | undefined {
+    return this._lessons
+      .flatMap(l => l.exercises || [])
+      .find(e => e.id === exerciseId);
   }
 }

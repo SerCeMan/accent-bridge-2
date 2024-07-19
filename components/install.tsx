@@ -17,6 +17,9 @@ import { SupabaseService } from './services/supabase';
 import { SettingsStore } from './pages/stores/SettingsStore';
 import { Loading } from './pages/Loading';
 import { LessonsService } from './services/lessons';
+import { ExerciseDetail } from './pages/ExerciseDetail';
+import { lessons } from '../mock';
+import { ExerciseStore } from './pages/stores/ExerciseStore';
 
 const supabase = new SupabaseService();
 const authService = new AuthService(supabase);
@@ -44,7 +47,10 @@ const AuthPage = () => {
 
 const lessonsService = new LessonsService();
 const LessonsPage = () => <Lessons store={lessonsService} />;
-const LessonPage = () => <LessonDetail store={lessonsService} />;
+const LessonPage = () => <LessonDetail lessonService={lessonsService} />;
+
+const exerciseStore = new ExerciseStore(lessonsService, apiClient, settings);
+const ExercisePage = () => <ExerciseDetail store={exerciseStore} lessonService={lessonsService} />;
 
 const Tabs = () => {
   return (
@@ -53,13 +59,13 @@ const Tabs = () => {
         <Route path="/shadow" render={() => <ShadowPage />} exact={true} />
         <Route path="/lessons" render={() => <LessonsPage />} exact={true} />
         <Route
-          path="/lessons/:listId"
+          path="/lessons/:lessonId"
           render={() => <LessonPage />}
           exact={true}
         />
         <Route
-          path="/exercises/:exerciseId"
-          render={() => <LessonPage />}
+          path="/lessons/:lessonId/exercises/:exerciseId"
+          render={() => <ExercisePage />}
           exact={true}
         />
         <Route path="/settings" render={() => <SettingsPage />} exact={true} />

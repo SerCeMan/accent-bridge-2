@@ -16,14 +16,14 @@ import { observer } from 'mobx-react-lite';
 import { LessonsService } from '../services/lessons';
 
 type LessonDetailParams = {
-  listId: string;
+  lessonId: string;
 };
 
-const ListItems = ({ list }: { list: Lesson }) => {
+const ListItems = ({ lessonId, list }: { lessonId: string, list: Lesson }) => {
   return (
     <IonList>
       {(list?.exercises || []).map((item, key) => (
-        <LessonItem item={item} name={`Exercise ${key + 1}`} key={key} />
+        <LessonItem item={item} lessonId={lessonId} name={`Exercise ${key + 1}`} key={key} />
       ))}
     </IonList>
   );
@@ -32,23 +32,24 @@ const ListItems = ({ list }: { list: Lesson }) => {
 const LessonItem = (
   {
     item,
+    lessonId,
     name
   }: {
     item: Exercise;
-    name: string
+    lessonId: string;
+    name: string;
   }) => (
-  <IonItem routerLink={`/exercises/${item.id}`}>
+  <IonItem routerLink={`/lessons/${lessonId}/exercises/${item.id}`}>
     <IonLabel>{name}</IonLabel>
   </IonItem>
 );
 
 export const LessonDetail = observer((
-  { store }: { store: LessonsService },
+  { lessonService }: { lessonService: LessonsService },
 ) => {
-  const lists = store.lessons;
   const params = useParams<LessonDetailParams>();
-  const { listId } = params;
-  const loadedList = lists.find(l => l.id === listId);
+  const { lessonId } = params;
+  const loadedList = lessonService.findLessonById(lessonId)
 
   return (
     <IonPage>
@@ -60,7 +61,7 @@ export const LessonDetail = observer((
           <IonTitle>{loadedList?.name}</IonTitle>
         </IonToolbar>
       </IonHeader>
-      <IonContent>{loadedList && <ListItems list={loadedList} />}</IonContent>
+      <IonContent>{loadedList && <ListItems lessonId={lessonId} list={loadedList} />}</IonContent>
     </IonPage>
   );
 });

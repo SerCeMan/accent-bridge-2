@@ -48,13 +48,15 @@ export const Shadow = observer(({ store }: { store: ShadowStore }) => {
       )}
       <div className="w-full max-w-md">
         <div className="flex justify-center mb-4">
-          <IonButton
-            onClick={() => store.handleSynthesize()}
-            color="success"
-            className="mr-2"
-          >
-            {store.isSelectedAccentLoaded ? 'Synthesize' : <IonSpinner />}
-          </IonButton>
+          {store.showSynthesizeButton && (
+            <IonButton
+              onClick={() => store.handleSynthesize()}
+              color="success"
+              className="mr-2"
+            >
+              {store.isSelectedAccentLoaded ? 'Synthesize' : <IonSpinner />}
+            </IonButton>
+          )}
           <IonButton
             onClick={handleShadowing}
             color={store.isShadowing ? 'danger' : 'success'}
@@ -86,6 +88,7 @@ export const Shadow = observer(({ store }: { store: ShadowStore }) => {
               placeholder="Enter text you want to shadow..."
               rows={5}
               value={store.canonicalText}
+              readOnly={store.isCanonicalTextReadOnly}
               onChange={(e) => (store.canonicalText = e.target.value)}
             />
           </div>

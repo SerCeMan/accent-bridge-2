@@ -1,7 +1,6 @@
 import { makeAutoObservable, runInAction } from 'mobx';
 import { SupabaseService } from '../../services/supabase';
 import { User } from '@supabase/auth-js';
-import { refresh } from 'ionicons/icons';
 
 export class SettingsStore {
   private _selectedAccent: string | undefined = undefined;

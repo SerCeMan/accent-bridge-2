@@ -8,7 +8,7 @@ import {
   IonTitle,
   IonToolbar,
 } from '@ionic/react';
-import { useParams } from 'react-router-dom';
+import { useParams } from 'react-router';
 import { observer } from 'mobx-react-lite';
 import { LessonsService } from '../services/lessons';
 import { useEffect } from 'react';

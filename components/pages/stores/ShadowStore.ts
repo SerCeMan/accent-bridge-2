@@ -41,7 +41,7 @@ export class ShadowStore {
         if (isSelectedAccentLoaded) {
           resolve();
         }
-      });
+      }, { fireImmediately: true });
     });
   }
 

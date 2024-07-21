@@ -10,10 +10,11 @@ import {
   IonTitle,
   IonToolbar,
 } from '@ionic/react';
-import { useParams } from 'react-router-dom';
+import { useParams } from 'react-router';
 import { Exercise, Lesson } from '../../mock';
 import { observer } from 'mobx-react-lite';
 import { LessonsService } from '../services/lessons';
+import { LessonDetailStore } from './stores/LessonDetailStore';
 
 type LessonDetailParams = {
   lessonId: string;
@@ -45,11 +46,12 @@ const LessonItem = (
 );
 
 export const LessonDetail = observer((
-  { lessonService }: { lessonService: LessonsService },
+  { store }: { store: LessonDetailStore },
 ) => {
   const params = useParams<LessonDetailParams>();
   const { lessonId } = params;
-  const loadedList = lessonService.findLessonById(lessonId)
+  const loadedList = store.findLessonById(lessonId)
+  console.log("PARAMS: ", params)
 
   return (
     <IonPage>

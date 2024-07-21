@@ -1,4 +1,4 @@
-import { Lesson } from '../../data';
+import { Lesson } from '../../data/lessons';
 import { IonContent, IonHeader, IonItem, IonLabel, IonList, IonPage, IonTitle, IonToolbar } from '@ionic/react';
 import { LessonsService } from '../services/lessons';
 import { observer } from 'mobx-react-lite';

@@ -11,7 +11,7 @@ import {
   IonToolbar,
 } from '@ionic/react';
 import { useParams } from 'react-router';
-import { Exercise, Lesson } from '../../data';
+import { Exercise, Lesson } from '../../data/lessons';
 import { observer } from 'mobx-react-lite';
 import { LessonsService } from '../services/lessons';
 import { LessonDetailStore } from './stores/LessonDetailStore';

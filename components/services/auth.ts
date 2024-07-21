@@ -23,7 +23,6 @@ export class AuthService {
   }
 
   private set session(session: Session | null) {
-    console.log('session', session);
     this._session = session;
   }
 

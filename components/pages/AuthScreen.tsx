@@ -16,7 +16,6 @@ export const WithAuth = observer(({
   LoggedIn: React.ComponentType<any>
   LoggedOut: React.ComponentType<any>
 }) => {
-  console.log('authService.session', authService.session);
   return (
     <>
       {!authService.isInitialized

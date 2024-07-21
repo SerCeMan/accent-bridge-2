@@ -1,5 +1,5 @@
 import { makeAutoObservable } from 'mobx';
-import { Exercise, Lesson, lessons } from '../../mock';
+import { Exercise, Lesson, lessons } from '../../data';
 
 export class LessonsService {
   private _lessons: Lesson[];

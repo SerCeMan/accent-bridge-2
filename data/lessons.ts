@@ -38,19 +38,19 @@ export const lessons: Lesson[] = [
     exercises: [
       {
         id: '922f1a6e-9137-415d-ac01-4a5445dc2aca',
-        text: 'text'
-      },
-      {
-        id: 'e02fb7a5-0b5d-4876-9f57-9b4b23f9668d',
-        text: 'text'
+        text: 'Every Friday five crates of oranges and lemons arrived from a fruiterer in New York—every Monday these same oranges and lemons left his back door in a pyramid of pulpless halves. There was a machine in the kitchen which could extract the juice of two hundred oranges in half an hour, if a little button was pressed two hundred times by a butler\'s thumb.'
       },
       {
         id: '175ffadd-93e2-414a-88f3-dac4c28711a1',
-        text: 'text'
+        text: 'The day agreed upon was pouring rain. At eleven o\'clock a man in a raincoat dragging a lawn-mower tapped at my front door and said that Mr. Gatsby had sent him over to cut my grass. This reminded me that I had forgotten to tell my Finn to come back so I drove into West Egg Village to search for her among soggy white-washed alleys and to buy some cups and lemons and flowers.'
+      },
+      {
+        id: 'e02fb7a5-0b5d-4876-9f57-9b4b23f9668d',
+        text: 'I believe that on the first night I went to Gatsby\'s house I was one of the few guests who had actually been invited. People were not invited—they went there. They got into automobiles which bore them out to Long Island and somehow they ended up at Gatsby\'s door. Once there they were introduced by somebody who knew Gatsby and after that they conducted themselves according to the rules of behavior associated with amusement parks. Sometimes they came and went without having met Gatsby at all, came for the party with a simplicity of heart that was its own ticket of admission.'
       },
       {
         id: '60b4ac9d-862e-49af-8ed2-733d558ca366',
-        text: 'text'
+        text: 'As I went over to say goodbye I saw that the expression of bewilderment had come back into Gatsby\'s face, as though a faint doubt had occurred to him as to the quality of his present happiness. Almost five years! There must have been moments even that afternoon when Daisy tumbled short of his dreams—not through her own fault but because of the colossal vitality of his illusion. It had gone beyond her, beyond everything. He had thrown himself into it with a creative passion, adding to it all the time, decking it out with every bright feather that drifted his way. No amount of fire or freshness can challenge what a man will store up in his ghostly heart.'
       },
     ],
   },

@@ -18,7 +18,7 @@ import { SettingsStore } from './pages/stores/SettingsStore';
 import { Loading } from './pages/Loading';
 import { LessonsService } from './services/lessons';
 import { ExerciseDetail } from './pages/ExerciseDetail';
-import { lessons } from '../mock';
+import { lessons } from '../data';
 import { ExerciseStore } from './pages/stores/ExerciseStore';
 import { LessonDetailStore } from './pages/stores/LessonDetailStore';
 

@@ -11,7 +11,7 @@ import {
   IonToolbar,
 } from '@ionic/react';
 import { useParams } from 'react-router';
-import { Exercise, Lesson } from '../../mock';
+import { Exercise, Lesson } from '../../data';
 import { observer } from 'mobx-react-lite';
 import { LessonsService } from '../services/lessons';
 import { LessonDetailStore } from './stores/LessonDetailStore';
@@ -51,7 +51,6 @@ export const LessonDetail = observer((
   const params = useParams<LessonDetailParams>();
   const { lessonId } = params;
   const loadedList = store.findLessonById(lessonId)
-  console.log("PARAMS: ", params)
 
   return (
     <IonPage>

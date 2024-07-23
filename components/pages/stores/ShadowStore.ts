@@ -27,7 +27,7 @@ export class ShadowStore {
   showSynthesizeButton: boolean = true;
   _bestScore: number | undefined | LOADING = undefined;
   _onNewBestScore: ((score: number) => void) | null = null;
-  playSoundOnStart: boolean = true; // New property for the checkbox state
+  enableShadowingPlayback: boolean = true;
 
 
   constructor(
@@ -163,16 +163,17 @@ export class ShadowStore {
 
     shadowingMediaRecorder.start();
 
-    if (this.playSoundOnStart) {
+    if (this.enableShadowingPlayback) {
       setTimeout(() => {
         audio.play();
       }, 250);
     }
   }
+
   updateBestScore() {
-    console.log("updateBestScore")
-    console.log(this.shadowingScore)
-    console.log(this._bestScore)
+    console.log('updateBestScore');
+    console.log(this.shadowingScore);
+    console.log(this._bestScore);
     const score = this.shadowingScore;
     if (score !== undefined &&
       (this._bestScore === undefined ||
@@ -196,10 +197,14 @@ export class ShadowStore {
     if (this.shadowingMediaRecorder && this.isShadowing) {
       if (this.isPaused) {
         this.shadowingMediaRecorder.resume();
-        this.shadowingAudio?.play();
+        if (this.enableShadowingPlayback) {
+          this.shadowingAudio?.play();
+        }
       } else {
         this.shadowingMediaRecorder.pause();
-        this.shadowingAudio?.pause();
+        if (this.enableShadowingPlayback) {
+          this.shadowingAudio?.pause();
+        }
       }
       this.setIsPaused(!this.isPaused);
     }

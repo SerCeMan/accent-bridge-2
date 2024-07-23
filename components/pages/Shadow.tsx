@@ -69,8 +69,9 @@ export const Shadow = observer(({ store }: { store: ShadowStore }) => {
           <IonItem>
             <IonLabel className="w-fit pr-2">Shadowing Playback</IonLabel>
             <IonCheckbox
-              checked={store.playSoundOnStart}
-              onIonChange={e => store.playSoundOnStart = e.detail.checked}
+              disabled={store.isShadowing}
+              checked={store.enableShadowingPlayback}
+              onIonChange={e => store.enableShadowingPlayback = e.detail.checked}
             />
           </IonItem>
         </div>

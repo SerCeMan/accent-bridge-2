@@ -1,9 +1,9 @@
 import { useEffect } from 'react';
 import {
   IonButton,
-  IonButtons,
+  IonButtons, IonCheckbox,
   IonContent,
-  IonHeader,
+  IonHeader, IonItem, IonLabel,
   IonMenuButton,
   IonPage,
   IonSpinner,
@@ -40,7 +40,7 @@ export const Shadow = observer(({ store }: { store: ShadowStore }) => {
       {!store.isLoading && store.errorMessage && (
         <p className="text-red-600">{store.errorMessage}</p>
       )}
-      <div className="w-full max-w-lg">
+      <div className="w-full">
         <div className="flex justify-center mb-4">
           {store.showSynthesizeButton && (
             <IonButton
@@ -66,7 +66,15 @@ export const Shadow = observer(({ store }: { store: ShadowStore }) => {
           >
             Stop
           </IonButton>
+          <IonItem>
+            <IonLabel className="w-fit pr-2">Shadowing Playback</IonLabel>
+            <IonCheckbox
+              checked={store.playSoundOnStart}
+              onIonChange={e => store.playSoundOnStart = e.detail.checked}
+            />
+          </IonItem>
         </div>
+
         {store.shadowingScore !== undefined && (
           <Score score={store.shadowingScore} message={"Your score"} />
         )}
@@ -109,14 +117,13 @@ export const Shadow = observer(({ store }: { store: ShadowStore }) => {
           ? <IonSpinner/>
           : store.bestScore !== undefined
             ? <Score score={store.bestScore} message={"Your best score"}/>
-             : <div/>
+            : <div/>
         }
         {store.isLoading && <p className="text-blue-600">Loading...</p>}
       </div>
     </div>
   );
 });
-
 export const ShadowSkeleton = ({ children }: { children: React.ReactNode }) => {
   return (
     <IonPage>

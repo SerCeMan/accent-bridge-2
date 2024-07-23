@@ -27,6 +27,8 @@ export class ShadowStore {
   showSynthesizeButton: boolean = true;
   _bestScore: number | undefined | LOADING = undefined;
   _onNewBestScore: ((score: number) => void) | null = null;
+  playSoundOnStart: boolean = true; // New property for the checkbox state
+
 
   constructor(
     private readonly apiClient: ApiClient,
@@ -160,11 +162,13 @@ export class ShadowStore {
     };
 
     shadowingMediaRecorder.start();
-    setTimeout(() => {
-      audio.play();
-    }, 2000);
-  }
 
+    if (this.playSoundOnStart) {
+      setTimeout(() => {
+        audio.play();
+      }, 250);
+    }
+  }
   updateBestScore() {
     console.log("updateBestScore")
     console.log(this.shadowingScore)

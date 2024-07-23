@@ -36,7 +36,7 @@ export const ExerciseDetail = observer((
     </IonPage>;
   }
 
-  const shadowStore: ShadowStore = store.getShadowStore(exerciseId);
+  const shadowStore: ShadowStore = store.getShadowStore(lessonId, exerciseId);
   return (
     <IonPage>
       <IonHeader>

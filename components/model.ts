@@ -1,3 +1,6 @@
+export const LOADING = '$LOADING$';
+export type LOADING = typeof LOADING;
+
 export interface ChunkData {
   start: number;
   end: number;

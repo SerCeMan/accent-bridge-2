@@ -7,50 +7,56 @@ import {
   IonLabel,
   IonList,
   IonPage,
+  IonSpinner,
   IonTitle,
   IonToolbar,
 } from '@ionic/react';
 import { useParams } from 'react-router';
-import { Exercise, Lesson } from '../../data/lessons';
+import { Lesson } from '../../data/lessons';
 import { observer } from 'mobx-react-lite';
-import { LessonsService } from '../services/lessons';
 import { LessonDetailStore } from './stores/LessonDetailStore';
+import { LOADING } from '../model';
+import { formatPerc } from '../services/utils';
 
 type LessonDetailParams = {
   lessonId: string;
 };
 
-const ListItems = ({ lessonId, list }: { lessonId: string, list: Lesson }) => {
+const ListItems = observer((
+  {
+    lessonId,
+    store,
+    lesson,
+  }: {
+    lessonId: string,
+    store: LessonDetailStore,
+    lesson: Lesson
+  }) => {
   return (
     <IonList>
-      {(list?.exercises || []).map((item, key) => (
-        <LessonItem item={item} lessonId={lessonId} name={`Exercise ${key + 1}`} key={key} />
-      ))}
+      {(lesson?.exercises || []).map((exercise, key) => {
+        const progress = store.findBestScoreByExercise(exercise.id);
+        return (
+          <IonItem routerLink={`/lessons/${lessonId}/exercises/${exercise.id}`} key={key}>
+            <IonLabel>{`Exercise ${key + 1}`}</IonLabel>
+            {progress == LOADING
+              ? <IonSpinner />
+              : progress == undefined
+                ? <IonLabel>Not started</IonLabel>
+                : <IonLabel>{`Best score: ${formatPerc(progress)}%`}</IonLabel>}
+          </IonItem>
+        );
+      })}
     </IonList>
   );
-};
-
-const LessonItem = (
-  {
-    item,
-    lessonId,
-    name
-  }: {
-    item: Exercise;
-    lessonId: string;
-    name: string;
-  }) => (
-  <IonItem routerLink={`/lessons/${lessonId}/exercises/${item.id}`}>
-    <IonLabel>{name}</IonLabel>
-  </IonItem>
-);
+});
 
 export const LessonDetail = observer((
   { store }: { store: LessonDetailStore },
 ) => {
   const params = useParams<LessonDetailParams>();
   const { lessonId } = params;
-  const loadedList = store.findLessonById(lessonId)
+  const lesson: Lesson | undefined = store.findLessonById(lessonId);
 
   return (
     <IonPage>
@@ -59,10 +65,11 @@ export const LessonDetail = observer((
           <IonButtons slot="start">
             <IonBackButton defaultHref="/lessons" />
           </IonButtons>
-          <IonTitle>{loadedList?.name}</IonTitle>
+          <IonTitle>{lesson?.name}</IonTitle>
         </IonToolbar>
       </IonHeader>
-      <IonContent>{loadedList && <ListItems lessonId={lessonId} list={loadedList} />}</IonContent>
+      <IonContent>{lesson &&
+        <ListItems lessonId={lessonId} store={store} lesson={lesson} />}</IonContent>
     </IonPage>
   );
 });

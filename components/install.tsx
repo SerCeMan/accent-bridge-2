@@ -1,6 +1,6 @@
 import { Shadow, ShadowSkeleton } from './pages/Shadow';
 import { IonApp, IonIcon, IonLabel, IonRouterOutlet, IonTabBar, IonTabButton, IonTabs } from '@ionic/react';
-import { Redirect, Route } from 'react-router';
+import { Route } from 'react-router';
 import { Lessons } from './pages/Lessons';
 import { LessonDetail } from './pages/LessonDetail';
 import { Settings } from './pages/Settings';
@@ -18,9 +18,10 @@ import { SettingsStore } from './pages/stores/SettingsStore';
 import { Loading } from './pages/Loading';
 import { LessonsService } from './services/lessons';
 import { ExerciseDetail } from './pages/ExerciseDetail';
-import { lessons } from '../data';
 import { ExerciseStore } from './pages/stores/ExerciseStore';
 import { LessonDetailStore } from './pages/stores/LessonDetailStore';
+import { ProgressService } from './services/progress';
+import { LessonsStore } from './pages/stores/LessonsStore';
 
 const supabase = new SupabaseService();
 const authService = new AuthService(supabase);
@@ -46,12 +47,14 @@ const AuthPage = () => {
   return <AuthScreen authService={authService} />;
 };
 
+const progressService = new ProgressService(authService, supabase);
 const lessonsService = new LessonsService();
-const LessonsPage = () => <Lessons store={lessonsService} />;
-const lessonDetailStore = new LessonDetailStore(lessonsService);
+const lessonsStore = new LessonsStore(lessonsService, progressService);
+const LessonsPage = () => <Lessons store={lessonsStore} />;
+const lessonDetailStore = new LessonDetailStore(lessonsService, progressService);
 const LessonPage = () => <LessonDetail store={lessonDetailStore} />;
 
-const exerciseStore = new ExerciseStore(lessonsService, apiClient, settings);
+const exerciseStore = new ExerciseStore(lessonsService, progressService, apiClient, settings);
 const ExercisePage = () => <ExerciseDetail store={exerciseStore} lessonService={lessonsService} />;
 
 const Tabs = () => {

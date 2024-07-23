@@ -5,7 +5,8 @@ import {
   IonContent,
   IonHeader,
   IonMenuButton,
-  IonPage, IonSpinner,
+  IonPage,
+  IonSpinner,
   IonTitle,
   IonToolbar,
 } from '@ionic/react';
@@ -13,13 +14,14 @@ import { observer } from 'mobx-react-lite';
 import { StyledTextChunk } from '../ui/StyledTextChunk';
 
 import { ShadowStore } from './stores/ShadowStore';
+import { LOADING } from '../model';
 
-function Score({ score }: { score: number }) {
+function Score({ score, message }: { score: number, message: string }) {
   const color = score >= 0.75 ? 'text-green-600' : score >= 0.5 ? 'text-yellow-600' : 'text-red-600';
   return (
     <div className="flex justify-center mb-4">
       <span className={`text-lg font-semibold ${color}`}>
-        Your score: {Math.round(100 * score)}%
+        {message}: {Math.round(100 * score)}%
       </span>
     </div>
   );
@@ -33,20 +35,12 @@ export const Shadow = observer(({ store }: { store: ShadowStore }) => {
     };
   }, []);
 
-  const handleShadowing = () => {
-    if (store.isShadowing) {
-      store.handlePauseResumeShadowing();
-    } else {
-      store.handleStartShadowing();
-    }
-  };
-
   return (
     <div className="flex flex-col items-center min-h-screen">
       {!store.isLoading && store.errorMessage && (
         <p className="text-red-600">{store.errorMessage}</p>
       )}
-      <div className="w-full max-w-md">
+      <div className="w-full max-w-lg">
         <div className="flex justify-center mb-4">
           {store.showSynthesizeButton && (
             <IonButton
@@ -58,7 +52,7 @@ export const Shadow = observer(({ store }: { store: ShadowStore }) => {
             </IonButton>
           )}
           <IonButton
-            onClick={handleShadowing}
+            onClick={() => store.handleShadowing()}
             color={store.isShadowing ? 'danger' : 'success'}
             disabled={!store.synthesizedAudioSrc}
             className="mr-2"
@@ -74,7 +68,7 @@ export const Shadow = observer(({ store }: { store: ShadowStore }) => {
           </IonButton>
         </div>
         {store.shadowingScore !== undefined && (
-          <Score score={store.shadowingScore} />
+          <Score score={store.shadowingScore} message={"Your score"} />
         )}
         <div style={{ height: '30em' }} className="flex flex-row">
           <div className="flex flex-col items-center justify-center h-full w-1/2">
@@ -111,6 +105,12 @@ export const Shadow = observer(({ store }: { store: ShadowStore }) => {
             </div>
           </div>
         </div>
+        {store.bestScore === LOADING
+          ? <IonSpinner/>
+          : store.bestScore !== undefined
+            ? <Score score={store.bestScore} message={"Your best score"}/>
+             : <div/>
+        }
         {store.isLoading && <p className="text-blue-600">Loading...</p>}
       </div>
     </div>

@@ -1,31 +1,53 @@
 import { Lesson } from '../../data/lessons';
-import { IonContent, IonHeader, IonItem, IonLabel, IonList, IonPage, IonTitle, IonToolbar } from '@ionic/react';
-import { LessonsService } from '../services/lessons';
+import {
+  IonContent,
+  IonHeader,
+  IonItem,
+  IonLabel,
+  IonList,
+  IonPage,
+  IonSpinner,
+  IonTitle,
+  IonToolbar,
+} from '@ionic/react';
 import { observer } from 'mobx-react-lite';
+import { LessonsStore } from './stores/LessonsStore';
+import { formatPerc } from '../services/utils';
 
-const LessonEntry = ({ list }: { list: Lesson }) => {
+const LessonEntry = ({ lesson, progress }: { lesson: Lesson, progress: undefined | Record<string, number> }) => {
+  const lessonProgress = progress ? progress[lesson.id] : undefined;
   return (
-    <IonItem routerLink={`/lessons/${list.id}`} className="list-entry">
-      <IonLabel>{list.name}</IonLabel>
+    <IonItem routerLink={`/lessons/${lesson.id}`} className="list-entry">
+      <IonLabel>{lesson.name}</IonLabel>
+      {!progress
+        ? <IonSpinner />
+        : <IonLabel>
+          {lessonProgress == null
+            ? 'Not started'
+            : lessonProgress >= 1
+              ? 'Completed'
+              : `${(formatPerc(lessonProgress))}%`}
+        </IonLabel>}
     </IonItem>
   );
 };
 
 const AllLessons = observer((
-  { store }: { store: LessonsService },
+  { store }: { store: LessonsStore },
 ) => {
   const lessons = store.lessons;
+  const progress = store.progressByLesson;
   return (
     <>
-      {lessons.map((list, i) => (
-        <LessonEntry list={list} key={i} />
+      {lessons.map((lesson, i) => (
+        <LessonEntry lesson={lesson} progress={progress} key={i} />
       ))}
     </>
   );
 });
 
 export const Lessons = observer((
-  { store }: { store: LessonsService },
+  { store }: { store: LessonsStore },
 ) => {
   return (
     <IonPage>

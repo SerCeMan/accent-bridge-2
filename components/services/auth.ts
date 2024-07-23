@@ -5,6 +5,7 @@ import { SupabaseService } from './supabase';
 export class AuthService {
   private _session: Session | null = null;
   private _isInitialized = false;
+  private callbacks: ((session: Session | null) => void)[] = [];
 
   constructor(
     private readonly supabase: SupabaseService
@@ -19,6 +20,7 @@ export class AuthService {
       });
     supabase.client.auth.onAuthStateChange((_event, session) => {
       this.session = session;
+      this.callbacks.forEach(cb => cb(session));
     });
   }
 
@@ -43,5 +45,12 @@ export class AuthService {
     this.session = null;
     // todo router
     window.location.href = '/';
+  }
+
+  async onAuthChange(callback: (session: Session | null) => void) {
+    this.callbacks.push(callback);
+    if (this.session) {
+      callback(this.session);
+    }
   }
 }

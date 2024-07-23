@@ -1,4 +1,4 @@
-import { ChunkData } from '../../model';
+import { ChunkData, LOADING } from '../../model';
 import { fakeShadowText, isFakeMode } from '../../fakedata';
 import { ApiClient } from '../../api';
 import { computed, makeAutoObservable, reaction, runInAction } from 'mobx';
@@ -25,6 +25,8 @@ export class ShadowStore {
   shadowingAudioBlob: Blob | null = null;
   isCanonicalTextReadOnly: boolean = false;
   showSynthesizeButton: boolean = true;
+  _bestScore: number | undefined | LOADING = undefined;
+  _onNewBestScore: ((score: number) => void) | null = null;
 
   constructor(
     private readonly apiClient: ApiClient,
@@ -77,6 +79,14 @@ export class ShadowStore {
     );
 
     return Math.max(selectedAccentScore, maxOtherAccentScore);
+  }
+
+  handleShadowing() {
+    if (this.isShadowing) {
+      this.handlePauseResumeShadowing();
+    } else {
+      this.handleStartShadowing();
+    }
   }
 
   async handleStartShadowing() {
@@ -134,6 +144,7 @@ export class ShadowStore {
         const data = await this.apiClient.uploadAudio(audioBlob);
         runInAction(() => {
           this.setTranscriptionData(data.chunks);
+          this.updateBestScore();
         });
       } catch (error) {
         console.error('Error uploading shadowing audio:', error);
@@ -152,6 +163,21 @@ export class ShadowStore {
     setTimeout(() => {
       audio.play();
     }, 2000);
+  }
+
+  updateBestScore() {
+    console.log("updateBestScore")
+    console.log(this.shadowingScore)
+    console.log(this._bestScore)
+    const score = this.shadowingScore;
+    if (score !== undefined &&
+      (this._bestScore === undefined ||
+        (typeof (this._bestScore) === 'number' && score > this._bestScore))) {
+      this.bestScore = score;
+      if (this._onNewBestScore) {
+        this._onNewBestScore(score);
+      }
+    }
   }
 
   handleStopShadowing() {
@@ -192,6 +218,18 @@ export class ShadowStore {
     this._canonicalText = value;
   }
 
+  get bestScore(): number | undefined | LOADING {
+    return this._bestScore;
+  }
+
+  set bestScore(value: number | undefined | LOADING) {
+    this._bestScore = value;
+  }
+
+  set onNewBestScore(value: (score: number) => void) {
+    this._onNewBestScore = value;
+  }
+
   async setCanonicalTextState(text: string) {
     runInAction(() => {
       this.canonicalText = text;
@@ -200,97 +238,6 @@ export class ShadowStore {
     });
     await this.ready();
     this.handleSynthesize();
-  }
-
-  get rawText(): string {
-    return this.transcriptionData.map((chunk: ChunkData) => chunk.text).join(' ');
-  }
-
-  async handleStartStopRecording() {
-    if (this.isRecording) {
-      this.handleStopRecording();
-    } else {
-      await this.handleStartRecording();
-    }
-  }
-
-  async handleStartRecording() {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      runInAction(() => {
-        this.audioStream = stream;
-        this.setIsRecording(true);
-        this.setErrorMessage(null);
-      });
-      const mediaRecorder = new MediaRecorder(stream);
-
-      runInAction(() => {
-        this.audioChunks = [];
-      });
-
-      mediaRecorder.ondataavailable = (event) => {
-        if (event.data.size > 0) {
-          runInAction(() => {
-            this.audioChunks.push(event.data);
-          });
-        }
-      };
-
-      mediaRecorder.onstop = async () => {
-        const audioBlob = new Blob(this.audioChunks, { type: 'audio/wav' });
-        if (audioBlob.size === 0) {
-          console.error('Recorded audio blob is empty.');
-          return;
-        }
-
-        const audioURL = URL.createObjectURL(audioBlob);
-        this.setAudioSrc(audioURL);
-
-        const formData = new FormData();
-        formData.append('file', audioBlob, 'audio.wav');
-
-        this.setIsLoading(true);
-        try {
-          const response = await fetch('http://192.168.50.197:5000/predict', {
-            method: 'POST',
-            body: formData,
-          });
-
-          if (!response.ok) {
-            throw new Error('Network response was not ok');
-          }
-
-          const data = await response.json();
-          runInAction(() => {
-            this.setTranscriptionData(data.chunks);
-          });
-        } catch (error) {
-          console.error('Error uploading audio:', error);
-          this.setErrorMessage('Error uploading audio');
-        } finally {
-          this.setIsLoading(false);
-          if (this.audioStream) {
-            this.audioStream.getTracks().forEach(track => track.stop());
-            this.audioStream = null;
-          }
-        }
-      };
-
-      runInAction(() => {
-        this.mediaRecorder = mediaRecorder;
-      });
-      mediaRecorder.start();
-    } catch (error) {
-      console.error('Error starting recording:', error);
-      this.setIsRecording(false);
-    }
-  }
-
-  handleStopRecording() {
-    if (this.mediaRecorder && this.isRecording) {
-      this.mediaRecorder.stop();
-      this.setIsRecording(false);
-    }
   }
 
   async handleSynthesize() {

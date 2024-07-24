@@ -1,9 +1,12 @@
 import { useEffect } from 'react';
 import {
   IonButton,
-  IonButtons, IonCheckbox,
+  IonButtons,
+  IonCheckbox,
   IonContent,
-  IonHeader, IonItem, IonLabel,
+  IonHeader,
+  IonItem,
+  IonLabel,
   IonMenuButton,
   IonPage,
   IonSpinner,
@@ -71,6 +74,7 @@ export const Shadow = observer(({ store }: { store: ShadowStore }) => {
             <IonCheckbox
               disabled={store.isShadowing}
               checked={store.enableShadowingPlayback}
+              aria-label={"Shadowing Playback"}
               onIonChange={e => store.enableShadowingPlayback = e.detail.checked}
             />
           </IonItem>

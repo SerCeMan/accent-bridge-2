@@ -1,5 +1,5 @@
 import { Session, SupabaseClient } from '@supabase/supabase-js';
-import { makeAutoObservable } from 'mobx';
+import { makeAutoObservable, runInAction } from 'mobx';
 import { SupabaseService } from './supabase';
 
 export class AuthService {
@@ -8,7 +8,7 @@ export class AuthService {
   private callbacks: ((session: Session | null) => void)[] = [];
 
   constructor(
-    private readonly supabase: SupabaseService
+    private readonly supabase: SupabaseService,
   ) {
     makeAutoObservable(this);
     supabase.client.auth.getSession()
@@ -16,7 +16,7 @@ export class AuthService {
         this.session = session;
       })
       .finally(() => {
-        this._isInitialized = true;
+        this.isInitialized = true;
       });
     supabase.client.auth.onAuthStateChange((_event, session) => {
       this.session = session;
@@ -26,6 +26,10 @@ export class AuthService {
 
   private set session(session: Session | null) {
     this._session = session;
+  }
+
+  private set isInitialized(isInitialized: boolean) {
+    this._isInitialized = isInitialized
   }
 
   get isInitialized() {

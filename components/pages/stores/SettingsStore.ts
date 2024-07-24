@@ -1,16 +1,21 @@
 import { makeAutoObservable, runInAction } from 'mobx';
 import { SupabaseService } from '../../services/supabase';
 import { User } from '@supabase/auth-js';
+import { AuthService } from '../../services/auth';
 
 export class SettingsStore {
   private _selectedAccent: string | undefined = undefined;
   private _isLoading: boolean = true;
   private _user: User | undefined = undefined;
 
-  constructor(private readonly supabase: SupabaseService) {
+  constructor(private readonly supabase: SupabaseService, auth: AuthService) {
     makeAutoObservable(this);
     // refresh eagerly so that other components can read settings immediately.
-    this.refreshSettings();
+    auth.onAuthChange((session) => {
+      if (session) {
+        this.refreshSettings();
+      }
+    })
   }
 
   get selectedAccent(): string | undefined {

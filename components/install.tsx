@@ -27,7 +27,7 @@ const supabase = new SupabaseService();
 const authService = new AuthService(supabase);
 const apiClient = new ApiClient(authService);
 
-const settings = new SettingsStore(supabase);
+const settings = new SettingsStore(supabase, authService);
 const SettingsPage = () => {
   return (
     <Settings store={settings} auth={authService} />

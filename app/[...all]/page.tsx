@@ -1,6 +1,8 @@
 import dynamic from 'next/dynamic';
 import { lessons } from '../../data/lessons';
 
+export const runtime = 'edge'
+
 const App = dynamic(() => import('../../components/AppShell'), {
   ssr: false,
 });

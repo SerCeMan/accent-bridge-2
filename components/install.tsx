@@ -22,17 +22,22 @@ import { ExerciseStore } from './pages/stores/ExerciseStore';
 import { LessonDetailStore } from './pages/stores/LessonDetailStore';
 import { ProgressService } from './services/progress';
 import { LessonsStore } from './pages/stores/LessonsStore';
+import { CapacitorStripeProvider, useCapacitorStripe } from '@capacitor-community/stripe/dist/esm/react/provider';
+import { StripeService } from './services/stripe';
+import { ProfileService } from './services/profiles';
 
 const supabase = new SupabaseService();
 const authService = new AuthService(supabase);
-const apiClient = new ApiClient(authService);
-
-const settings = new SettingsStore(supabase, authService);
+const profileService = new ProfileService(authService, supabase);
+const apiClient = new ApiClient(authService, profileService);
+const settings = new SettingsStore(supabase, authService, profileService, apiClient);
 const SettingsPage = () => {
   return (
     <Settings store={settings} auth={authService} />
   );
 };
+
+const stripeService = new StripeService();
 
 const shadowPageStore = new ShadowStore(apiClient, settings);
 const ShadowPage = () => {
@@ -108,7 +113,9 @@ const Router = () => {
   );
 };
 
-export const Root = observer(() => {
+const AppInitializer = observer(() => {
+  const stripe = useCapacitorStripe();
+  stripeService.stripe = stripe;
   return (
     <IonApp>
       <WithAuth
@@ -118,5 +125,16 @@ export const Root = observer(() => {
         LoggedOut={AuthPage}
       />
     </IonApp>
+  );
+});
+
+export const Root = observer(() => {
+  return (
+    <CapacitorStripeProvider
+      publishableKey="pk_live_51PfaxCHUC68AQdv3PVsgmXnj7b13iC7actc27pGENFYkFqaNGrCT6wXaK5bEiw05ehArYkJz43a31apvpii9adlc00OpCPiUli"
+      fallback={<p>Loading...</p>}
+    >
+      <AppInitializer />
+    </CapacitorStripeProvider>
   );
 });

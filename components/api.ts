@@ -1,9 +1,20 @@
 import { UploadAudioResponse } from './model';
 import { AuthService } from './services/auth';
 import { fakeShadowText, fakeUploadAudioResponse, isFakeMode } from './fakedata';
+import { ProfileService } from './services/profiles';
 
 export class ApiClient {
-  constructor(private readonly authService: AuthService) {}
+  private apiHost: string;
+  private appHost: string;
+
+  constructor(
+    private readonly authService: AuthService,
+    private readonly profileService: ProfileService,
+  ) {
+    this.apiHost = 'https://api.accentbridge.app';
+    // this.appHost = 'https://app.accentbridge.app';
+    this.appHost = '';
+  }
 
   private getAccessToken(): string {
     const session = this.authService.session;
@@ -13,6 +24,19 @@ export class ApiClient {
     return session.access_token;
   }
 
+  async subscribe() {
+    const response = await fetch(`${this.appHost}/api/stripe/subscribe`, {
+      method: 'POST',
+      body: JSON.stringify(
+        {
+          stripe_customer_id: this.profileService.stripeCustomer,
+        },
+      ),
+    });
+    const sessionUrl = (await response.json()).url;
+    window.location.href = sessionUrl;
+  }
+
   async uploadAudio(blob: Blob): Promise<UploadAudioResponse> {
     if (isFakeMode()) {
       return fakeUploadAudioResponse;
@@ -20,7 +44,7 @@ export class ApiClient {
     const formData = new FormData();
     formData.append('file', blob, 'audio.wav');
 
-    const response = await fetch('https://api.accentbridge.app/predict', {
+    const response = await fetch(`${this.apiHost}/predict`, {
       method: 'POST',
       body: formData,
       headers: {
@@ -36,7 +60,7 @@ export class ApiClient {
   }
 
   async synthesizeText(text: string, accent: string): Promise<Blob> {
-    const response = await fetch('https://api.accentbridge.app/synthesize', {
+    const response = await fetch(`${this.apiHost}/synthesize`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

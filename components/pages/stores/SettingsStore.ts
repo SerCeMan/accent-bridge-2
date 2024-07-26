@@ -2,20 +2,31 @@ import { makeAutoObservable, runInAction } from 'mobx';
 import { SupabaseService } from '../../services/supabase';
 import { User } from '@supabase/auth-js';
 import { AuthService } from '../../services/auth';
+import { ProfileService } from '../../services/profiles';
+import { ApiClient } from '../../api';
 
 export class SettingsStore {
   private _selectedAccent: string | undefined = undefined;
   private _isLoading: boolean = true;
   private _user: User | undefined = undefined;
 
-  constructor(private readonly supabase: SupabaseService, auth: AuthService) {
+  constructor(
+    private readonly supabase: SupabaseService,
+    auth: AuthService,
+    private readonly profileService: ProfileService,
+    private readonly apiClient: ApiClient
+  ) {
     makeAutoObservable(this);
     // refresh eagerly so that other components can read settings immediately.
     auth.onAuthChange((session) => {
       if (session) {
         this.refreshSettings();
       }
-    })
+    });
+  }
+
+  get plan() {
+    return this.profileService.plan;
   }
 
   get selectedAccent(): string | undefined {
@@ -32,7 +43,7 @@ export class SettingsStore {
   }
 
   async refreshSettings(): Promise<void> {
-    const userRes = await this.supabase.client.auth.getUser()
+    const userRes = await this.supabase.client.auth.getUser();
     if (!userRes.data?.user) {
       throw new Error(`Can't load user settings, ${userRes.error?.message}`);
     }
@@ -80,5 +91,13 @@ export class SettingsStore {
     if (error) {
       throw new Error(`Error updating setting: ${error.message}`);
     }
+  }
+
+  async upgradePlan() {
+    await this.apiClient.subscribe();
+  }
+
+  async managePlan() {
+
   }
 }

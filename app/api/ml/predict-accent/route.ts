@@ -11,7 +11,7 @@ export async function POST(req: NextRequest) {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': `${authHeader}`,
+      'Authorization': `Bearer ${authHeader}`,
     },
     body: req.body,
   });

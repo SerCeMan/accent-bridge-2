@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
-import { supabaseClient } from '../../../../services/supabase';
+import { supabaseSuperClient } from '../../../../services/supabase';
 
 export const runtime = 'edge';
 
@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
     email: jsonBody.record.email,
   });
 
-  const { data, error } = await supabaseClient
+  const { data, error } = await supabaseSuperClient
     .from('profiles')
     .update({
       stripe_customer: customer.id,

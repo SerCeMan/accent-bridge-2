@@ -18,7 +18,7 @@ export class ApiClient {
     if (!session) {
       throw new Error('User is logged out');
     }
-    return session.access_token;
+    return `${session.access_token},${session.refresh_token}`;
   }
 
   async subscribe(): Promise<string> {
@@ -56,7 +56,7 @@ export class ApiClient {
       method: 'POST',
       body: formData,
       headers: {
-        'Authorization': `Bearer ${this.getAccessToken()}`,
+        'Authorization': `${this.getAccessToken()}`,
       },
     });
 
@@ -72,7 +72,7 @@ export class ApiClient {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${this.getAccessToken()}`,
+        'Authorization': `${this.getAccessToken()}`,
       },
       body: JSON.stringify({ text, accent }),
     });

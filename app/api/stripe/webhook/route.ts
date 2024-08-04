@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server';
 import Stripe from 'stripe';
-import { supabaseClient } from '../../../../services/supabase';
+import { supabaseSuperClient } from '../../../../services/supabase';
 
 export const runtime = 'edge';
 
@@ -30,7 +30,7 @@ export async function POST(req: NextRequest) {
     return new Response('Webhook Error', { status: 400 });
   }
 
-  const supabase = supabaseClient;
+  const supabase = supabaseSuperClient;
 
   switch (event.type) {
     case 'customer.subscription.created':

@@ -1,14 +1,14 @@
 import { NextRequest } from 'next/server';
 import Stripe from 'stripe';
-import { supabaseClient } from '../../../services/supabase';
+import { supabaseClient } from '../../../../services/supabase';
 
 export const runtime = 'edge';
 
 function customerOrId(customer: any) {
   if (typeof customer === 'string') {
-    return customer
+    return customer;
   }
-  return customer.id
+  return customer.id;
 }
 
 export async function POST(req: NextRequest) {
@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = await req.text();
-    event = stripe.webhooks.constructEvent(body, signature, signingSecret);
+    event = await stripe.webhooks.constructEventAsync(body, signature, signingSecret);
   } catch (error) {
     console.log(error);
     return new Response('Webhook Error', { status: 400 });
@@ -49,5 +49,9 @@ export async function POST(req: NextRequest) {
         })
         .eq('stripe_customer', customerOrId(event.data.object.customer));
       break;
+    default:
+      return new Response('Unhandled event', { status: 400 });
   }
+
+  return Response.json({ ok: true });
 }

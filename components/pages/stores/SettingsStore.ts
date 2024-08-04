@@ -4,6 +4,8 @@ import { User } from '@supabase/auth-js';
 import { AuthService } from '../../services/auth';
 import { ProfileService } from '../../services/profiles';
 import { ApiClient } from '../../api';
+import { StripeService } from '../../services/stripe';
+import { win } from '@ionic/core/dist/types/utils/browser';
 
 export class SettingsStore {
   private _selectedAccent: string | undefined = undefined;
@@ -14,8 +16,8 @@ export class SettingsStore {
     private readonly supabase: SupabaseService,
     auth: AuthService,
     private readonly profileService: ProfileService,
-    private readonly apiClient: ApiClient
-  ) {
+    private readonly apiClient: ApiClient,
+    private readonly stripeService: StripeService) {
     makeAutoObservable(this);
     // refresh eagerly so that other components can read settings immediately.
     auth.onAuthChange((session) => {
@@ -94,10 +96,12 @@ export class SettingsStore {
   }
 
   async upgradePlan() {
-    await this.apiClient.subscribe();
+    const url = await this.apiClient.subscribe();
+    window.location.href = url;
   }
 
   async managePlan() {
-
+    const url = await this.apiClient.manageStripePortal();
+    window.location.href = url;
   }
 }

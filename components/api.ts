@@ -1,18 +1,15 @@
 import { UploadAudioResponse } from './model';
 import { AuthService } from './services/auth';
-import { fakeShadowText, fakeUploadAudioResponse, isFakeMode } from './fakedata';
+import { fakeUploadAudioResponse, isFakeMode } from './fakedata';
 import { ProfileService } from './services/profiles';
 
 export class ApiClient {
-  private apiHost: string;
   private appHost: string;
 
   constructor(
     private readonly authService: AuthService,
     private readonly profileService: ProfileService,
   ) {
-    this.apiHost = 'https://api.accentbridge.app';
-    // this.appHost = 'https://app.accentbridge.app';
     this.appHost = '';
   }
 
@@ -24,17 +21,28 @@ export class ApiClient {
     return session.access_token;
   }
 
-  async subscribe() {
+  async subscribe(): Promise<string> {
+    const req = {
+      stripe_customer_id: this.profileService.stripeCustomer,
+    };
     const response = await fetch(`${this.appHost}/api/stripe/subscribe`, {
       method: 'POST',
-      body: JSON.stringify(
-        {
-          stripe_customer_id: this.profileService.stripeCustomer,
-        },
-      ),
+      body: JSON.stringify(req),
     });
-    const sessionUrl = (await response.json()).url;
-    window.location.href = sessionUrl;
+    const res = await response.json();
+    return res.url;
+  }
+
+  async manageStripePortal() {
+    const req = {
+      stripe_customer_id: this.profileService.stripeCustomer,
+    };
+    const response = await fetch(`${this.appHost}/api/stripe/manage`, {
+      method: 'POST',
+      body: JSON.stringify(req),
+    });
+    const res = await response.json();
+    return res.url;
   }
 
   async uploadAudio(blob: Blob): Promise<UploadAudioResponse> {
@@ -44,7 +52,7 @@ export class ApiClient {
     const formData = new FormData();
     formData.append('file', blob, 'audio.wav');
 
-    const response = await fetch(`${this.apiHost}/predict`, {
+    const response = await fetch(`${this.appHost}/api/ml/predict-accent`, {
       method: 'POST',
       body: formData,
       headers: {
@@ -60,7 +68,7 @@ export class ApiClient {
   }
 
   async synthesizeText(text: string, accent: string): Promise<Blob> {
-    const response = await fetch(`${this.apiHost}/synthesize`, {
+    const response = await fetch(`${this.appHost}/api/ml/tts`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

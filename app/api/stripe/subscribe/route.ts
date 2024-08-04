@@ -18,6 +18,8 @@ export async function POST(req: NextRequest) {
   const session = await stripe.checkout.sessions.create({
     customer: customerId,
     mode: 'subscription',
+    setup_intent_data: {
+    },
     //line items
     line_items: [
       {
@@ -28,9 +30,10 @@ export async function POST(req: NextRequest) {
     success_url: `${process.env.NEXT_PUBLIC_DOMAIN}/settings`,
     cancel_url: `${process.env.NEXT_PUBLIC_DOMAIN}/settings`,
   });
-  if (!session.url) {
+  const intent = session.payment_intent
+  const url = session.url
+  if (!intent && !url) {
     return new Response('Error creating session', { status: 500 });
   }
-
-  return NextResponse.redirect(session.url, { status: 303 });
+  return new Response(JSON.stringify({ intent: intent, url: url }));
 }

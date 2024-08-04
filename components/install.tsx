@@ -30,14 +30,14 @@ const supabase = new SupabaseService();
 const authService = new AuthService(supabase);
 const profileService = new ProfileService(authService, supabase);
 const apiClient = new ApiClient(authService, profileService);
-const settings = new SettingsStore(supabase, authService, profileService, apiClient);
+const stripeService = new StripeService();
+const settings = new SettingsStore(supabase, authService, profileService, apiClient, stripeService);
 const SettingsPage = () => {
   return (
     <Settings store={settings} auth={authService} />
   );
 };
 
-const stripeService = new StripeService();
 
 const shadowPageStore = new ShadowStore(apiClient, settings);
 const ShadowPage = () => {
@@ -114,8 +114,8 @@ const Router = () => {
 };
 
 const AppInitializer = observer(() => {
-  const stripe = useCapacitorStripe();
-  stripeService.stripe = stripe;
+  // const stripe = useCapacitorStripe();
+  // stripeService.stripe = stripe;
   return (
     <IonApp>
       <WithAuth
@@ -130,11 +130,11 @@ const AppInitializer = observer(() => {
 
 export const Root = observer(() => {
   return (
-    <CapacitorStripeProvider
-      publishableKey="pk_live_51PfaxCHUC68AQdv3PVsgmXnj7b13iC7actc27pGENFYkFqaNGrCT6wXaK5bEiw05ehArYkJz43a31apvpii9adlc00OpCPiUli"
-      fallback={<p>Loading...</p>}
-    >
-      <AppInitializer />
-    </CapacitorStripeProvider>
+    // <CapacitorStripeProvider
+    //   publishableKey="pk_live_51PfaxCHUC68AQdv3PVsgmXnj7b13iC7actc27pGENFYkFqaNGrCT6wXaK5bEiw05ehArYkJz43a31apvpii9adlc00OpCPiUli"
+    //   fallback={<p>Loading...</p>}
+    // >
+    <AppInitializer />
+    // </CapacitorStripeProvider>
   );
 });
